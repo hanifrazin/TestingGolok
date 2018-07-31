@@ -328,19 +328,18 @@ else
     load('BayesGolok.mat')
     [PrediksiBayes,Posterior] = predict(BayesModel,Data_Uji);
     
-    Posterior
-    Posterior = transpose(Posterior);
+    Posterior_trans = transpose(Posterior);
     val_posterior = cell(1,3);
-    val_posterior{1,1} = Posterior(1);
-    val_posterior{1,2} = Posterior(2);
-    val_posterior{1,3} = Posterior(3);
+    val_posterior{1,1} = Posterior_trans(1);
+    val_posterior{1,2} = Posterior_trans(2);
+    val_posterior{1,3} = Posterior_trans(3);
     set(handles.uitable5,'Data',val_posterior),
     
-    if isequal(PrediksiBayes,1)
+    if isequal(Posterior(1,1),max(Posterior))
         hasil = 'Gablogan';
-    elseif isequal(PrediksiBayes,2)
+    elseif isequal(Posterior(1,2),max(Posterior))
         hasil = 'Sembelih';
-    elseif isequal(PrediksiBayes,3)
+    elseif isequal(Posterior(1,3),max(Posterior))
         hasil = 'Sorenan';
     end
     set(handles.edit_Hasil,'String',hasil)

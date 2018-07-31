@@ -161,10 +161,6 @@ class(8:11,1)=3;
 
 % perform run of Naive Bayes Classifer
 
-
-
-
-
 % BayesModel = NaiveBayes.fit(trainset,class);
 
 % save BayesModelGolok.mat BayesModel
@@ -199,7 +195,7 @@ disp(['accuracy SVM = ',num2str(akurasi_SVM*100,'%.2f'),'%'])
 
 DecTreeModel = fitctree(trainset,class,'MinParent',3);
 view(DecTreeModel,'mode','graph')
-isDecTree = floor(predict(DecTreeModel,testset'));
+isDecTree = predict(DecTreeModel,testset);
 disp(['Dec Tree ', 'Valid '])
 disp([isDecTree class_uji])
 salah_DecTree = sum(isDecTree~=class_uji);
