@@ -93,17 +93,17 @@ for n = 1:total_images_uji
     Img_uji = imread(full_name_uji);
     
     Gray_uji = rgb2gray(Img_uji);
+    
 %     figure,imhist(Gray_uji);ylim([0,200]);xlim([0,255]);
     Contrast_uji = imadjust(Gray_uji,stretchlim(Gray_uji),[]);
+
 %     figure,imhist(Contrast_uji);ylim([0,150]);xlim([0,255]);
-%     Median_uji = medfilt2(Contrast_uji,[3 3]);
     Median_uji = ordfilt2(Contrast_uji,5,ones(3,3));
+    
     Crop_uji = imcrop(Median_uji,[105.5 9.5 193 106]);
     Resize_uji = imresize(Crop_uji,[75 150]); 
-
     Biner_uji = imcomplement(imbinarize(Resize_uji,0.8));
-%     Biner_uji = imbinarize(Resize_uji,0.8);
-    
+
     SE1_uji = [1 1 1;1 1 1;1 1 1];
     SE2_uji = [1 0 1;0 1 0;1 0 1];
     SE_uji = strel('line', 3, 45);
@@ -128,8 +128,8 @@ for n = 1:total_images_uji
     Close_uji = bwmorph(Open_uji,'close');
    
 %     figure,imshow(Close_uji2);title(filenames_uji(n).name);
-%     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
-%     imwrite(Open_uji,path_uji,'jpg')
+    path_uji = ['Morfologi\Morph_',filenames_uji(n).name]
+    imwrite(Close_uji,path_uji,'jpg')
 
     stats_uji = regionprops(Close_uji,'all');
     area_uji(n) = stats_uji.Area;
@@ -200,7 +200,7 @@ end
 % end
 
 disp(['   Bayes ', 'Valid '])
-disp([isBayes isBayes2 class_uji])
+disp([isBayes2 class_uji])
 % salah_Bayes = sum(isBayes~=class_uji)
 % benar_Bayes = sum(isBayes==class_uji)
 % akurasi_Bayes = benar_Bayes/numel(class_uji)
