@@ -264,7 +264,7 @@ disp([isBackProp' class_uji])
 % PNN (Probabilistic Neural Network)
 T = ind2vec(target); 
 net = newpnn(train,T);
-% view(net);
+view(net);
 Y = sim(net,test);
 isPNN = vec2ind(Y);
 disp(['    PNN ', ' Valid '])
