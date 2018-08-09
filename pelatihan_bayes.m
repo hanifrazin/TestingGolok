@@ -3,7 +3,7 @@
 
 clc;clear;close all;
 
-image_folder = 'data latih';
+image_folder = 'data latih 3';
 filenames = dir(fullfile(image_folder, '*.jpg'));
 total_images = numel(filenames);
 
@@ -44,10 +44,10 @@ end
 trainset = [ro co rect elongation];
 
 % prepare class label for first run of naive bayes
-class=zeros(11,1);
-class(1:4,1)=1;
-class(5:7,1)=2;
-class(8:11,1)=3;
+class=zeros(18,1);
+class(1:6,1)=1;
+class(7:12,1)=2;
+class(13:18,1)=3;
 
 % perform run of Naive Bayes Classifer
 BayesModel = fitcnb(trainset,class);

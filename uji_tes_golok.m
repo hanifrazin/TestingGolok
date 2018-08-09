@@ -1,9 +1,31 @@
 % Hanif Razin Rahmatullah
 % Email  : hanifrazin@gmail.com
 
-clc;clear;close all;
+clc;clear all;close all;
 
-image_folder = 'data latih';
+image_folder = 'data latih 3';
+image_folder_uji = 'data uji 3';
+
+class=zeros(18,1);
+class(1:6,1)=1;
+class(7:12,1)=2;
+class(13:18,1)=3;
+
+class_uji=zeros(12,1);
+class_uji(1:4,1)=1;
+class_uji(5:8,1)=2;
+class_uji(9:12,1)=3;
+
+% class=zeros(18,1);
+% class(1:6,1)=1;
+% class(7:12,1)=2;
+% class(13:18,1)=3;
+
+% class_uji=zeros(18,1);
+% class_uji(1:6,1)=1;
+% class_uji(7:12,1)=2;
+% class_uji(13:18,1)=3;
+
 filenames = dir(fullfile(image_folder, '*.jpg'));
 total_images = numel(filenames);
 
@@ -75,7 +97,7 @@ for n = 1:total_images
     
 end
 
-image_folder_uji = 'data uji';
+
 filenames_uji = dir(fullfile(image_folder_uji, '*.jpg'));
 total_images_uji = numel(filenames_uji);
 
@@ -154,21 +176,13 @@ end
 trainset = [ro co rect elongation];
 testset  = [ro_uji co_uji rect_uji elongation_uji];
 % prepare class label for first run of svm
-class=zeros(11,1);
-class(1:4,1)=1;
-class(5:7,1)=2;
-class(8:11,1)=3;
+
 
 % perform run of Naive Bayes Classifer
 
 % BayesModel = NaiveBayes.fit(trainset,class);
 
 % save BayesModelGolok.mat BayesModel
-
-class_uji=zeros(23,1);
-class_uji(1:9,1)=1;
-class_uji(10:16,1)=2;
-class_uji(17:23,1)=3;
 
 % load BayesModelGolok
 % Testing
@@ -193,7 +207,7 @@ benar_SVM = sum(isSVM==class_uji);
 akurasi_SVM = benar_SVM/numel(class_uji);
 disp(['accuracy SVM = ',num2str(akurasi_SVM*100,'%.2f'),'%'])
 
-DecTreeModel = fitctree(trainset,class,'MinParent',3);
+DecTreeModel = fitctree(trainset,class);
 view(DecTreeModel,'mode','graph')
 isDecTree = predict(DecTreeModel,testset);
 disp(['Dec Tree ', 'Valid '])
@@ -203,7 +217,7 @@ benar_DecTree = sum(isDecTree==class_uji);
 akurasi_DecTree = benar_DecTree/numel(class_uji);
 disp(['accuracy Decision Tree = ',num2str(akurasi_DecTree*100,'%.2f'),'%'])
 
-k=8
+k=6
 KNNModel = fitcknn(trainset,class,'NumNeighbors',k);
 isKNN = predict(KNNModel,testset);
 disp(['    KNN ', ' Valid '])
@@ -261,5 +275,5 @@ disp([isPNN' class_uji])
 
 salah_JST = sum(transpose(isPNN)~=class_uji);
 benar_JST = sum(transpose(isPNN)==class_uji);
-akurasi_JST = benar_JST/numel(class_uji);
-disp(['accuracy PNN = ',num2str(akurasi_JST*100,'%.2f'),'%'])
+akurasi_PNN = benar_JST/numel(class_uji);
+disp(['accuracy PNN = ',num2str(akurasi_PNN*100,'%.2f'),'%'])

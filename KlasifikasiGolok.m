@@ -185,7 +185,9 @@ else
     
     axes(handles.axes3);
     imhist(Gray);ylim([0,200]);xlim([0,255]);
-   
+    F = getframe(handles.axes3);
+    Image = frame2im(F);
+    imwrite(Image, 'Contrast.jpg');
     setappdata(mydatacontainer,'preprocessing',Gray);
 end
 
@@ -206,7 +208,9 @@ else
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     axes(handles.axes3);
     imhist(Constretch);ylim([0,200]);xlim([0,255]);
-    
+    F = getframe(handles.axes3);
+    Image = frame2im(F);
+    imwrite(Image, 'Contrast Stretching.jpg');
     % Menghaluskan Citra
     fmed3x3 = ordfilt2(Constretch,5,ones(3,3));
     
