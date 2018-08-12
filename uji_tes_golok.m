@@ -4,12 +4,12 @@
 clc;clear all;close all;
 
 image_folder = 'data latih 3';
-image_folder_uji = 'data uji 3';
+image_folder_uji = 'data latih 3';
 
-% class=zeros(30,1);
-% class(1:10,1)=1;
-% class(11:20,1)=2;
-% class(21:30,1)=3;
+% class=zeros(18,1);
+% class(1:6,1)=1;
+% class(7:12,1)=2;
+% class(13:18,1)=3;
 % 
 % class_uji=class;
 
@@ -17,11 +17,11 @@ class=zeros(18,1);
 class(1:6,1)=1;
 class(7:12,1)=2;
 class(13:18,1)=3;
-
-class_uji=zeros(12,1);
-class_uji(1:4,1)=1;
-class_uji(5:8,1)=2;
-class_uji(9:12,1)=3;
+class_uji = class;
+% class_uji=zeros(12,1);
+% class_uji(1:4,1)=1;
+% class_uji(5:8,1)=2;
+% class_uji(9:12,1)=3;
 
 filenames = dir(fullfile(image_folder, '*.jpg'));
 total_images = numel(filenames);
@@ -89,7 +89,7 @@ for n = 1:total_images
     slim(n) = mayor_axis(n)/minor_axis(n);
     rpd(n) = perimeter(n)/mayor_axis(n);
     
-    rect(n) = (minor_axis(n)*mayor_axis(n))/area(n);
+    rect(n) = area(n)/(minor_axis(n)*mayor_axis(n));
     elongation(n) = 1 - (minor_axis(n)/mayor_axis(n));
     
 end
@@ -166,7 +166,7 @@ for n = 1:total_images_uji
     
     slim_uji(n) = mayor_axis_uji(n)/minor_axis_uji(n);
 
-    rect_uji(n) = (mayor_axis_uji(n)*minor_axis_uji(n))/area_uji(n);
+    rect_uji(n) = area_uji(n)/(mayor_axis_uji(n)*minor_axis_uji(n));
     elongation_uji(n) = 1 - (minor_axis_uji(n)/mayor_axis_uji(n));
 end
 
