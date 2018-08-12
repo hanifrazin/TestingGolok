@@ -23,7 +23,9 @@ area = zeros(total_images,1);
 perimeter = zeros(total_images,1);
 diameter = zeros(total_images,1);
 ro = zeros(total_images,1);
+ro2 = zeros(total_images,1);
 co = zeros(total_images,1);
+co2 = zeros(total_images,1);
 solidity = zeros(total_images,1);
 eccentricity = zeros(total_images,1);
 slim = zeros(total_images,1);
@@ -66,7 +68,9 @@ for n = 1:total_images
     convex_perim(n) = conv_stats.Perimeter;
     convexity(n) = convex_perim(n)/perimeter(n);
     co(n) = (perimeter(n)^2)/area(n);
+    co2(n) = (perimeter(n)^2)/(4*pi*area(n));
     ro(n) = (4*pi*area(n))/(perimeter(n)^2);
+    ro2(n) = (4*pi*area(n))/(convex_perim(n)^2);
     eccentricity(n) = stats.Eccentricity;
     solidity(n) = stats.Solidity;
     diameter(n) = stats.EquivDiameter;
@@ -91,7 +95,9 @@ area_uji = zeros(total_images_uji,1);
 perimeter_uji = zeros(total_images_uji,1);
 diameter_uji = zeros(total_images_uji,1);
 ro_uji = zeros(total_images_uji,1);
+ro2_uji = zeros(total_images_uji,1);
 co_uji = zeros(total_images_uji,1);
+co2_uji = zeros(total_images_uji,1);
 solidity_uji = zeros(total_images_uji,1);
 eccentricity_uji = zeros(total_images_uji,1);
 slim_uji = zeros(total_images_uji,1);
@@ -139,7 +145,9 @@ for n = 1:total_images_uji
     mayor_axis_uji(n) = stats_uji.MajorAxisLength;
     convexity_uji(n) = convex_perim_uji(n)/perimeter_uji(n);
     co_uji(n) = (perimeter_uji(n)^2)/area_uji(n);
+    co2_uji(n) = (perimeter_uji(n)^2)/(4*pi*area_uji(n));
     ro_uji(n) = (4*pi*area_uji(n))/(perimeter_uji(n)^2);
+    ro2_uji(n) = (4*pi*area_uji(n))/(convex_perim_uji(n)^2);
     eccentricity_uji(n) = stats_uji.Eccentricity;
     solidity_uji(n) = stats_uji.Solidity;
     diameter_uji(n) = stats_uji.EquivDiameter;
@@ -154,8 +162,12 @@ for n = 1:total_images_uji
     elongation_uji(n) = 1 - (minor_axis_uji(n)/mayor_axis_uji(n));
 end
 
-trainset = [area rect co solidity rpd];
-testset  = [area_uji rect_uji co_uji solidity_uji rpd_uji];
+% trainset = [area rect co solidity rpd]; 100%
+% testset  = [area_uji rect_uji co_uji solidity_uji rpd_uji]; 83%
+
+trainset = [area rect co2 solidity rpd];
+testset  = [area_uji rect_uji co2_uji solidity_uji rpd_uji];
+
 
 % load BayesModelGolok
 % Testing
