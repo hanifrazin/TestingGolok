@@ -208,25 +208,11 @@ else
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     axes(handles.axes3);
     imhist(Constretch);ylim([0,200]);xlim([0,255]);
-    F = getframe(handles.axes3);
-    Image = frame2im(F);
-    imwrite(Image, 'Contrast Stretching.jpg');
+  
     % Menghaluskan Citra
     fmed3x3 = ordfilt2(Constretch,5,ones(3,3));
-    
-    setappdata(mydatacontainer,'Smooth',fmed3x3);
-end
-
-% --- Executes on button press in btnCrop.
-function btnCrop_Callback(hObject, eventdata, handles)
-mydatacontainer = getappdata(0,'datacontainer');
-FiltMed3x3 = getappdata(mydatacontainer,'Smooth');
-if isempty(FiltMed3x3)
-    H = 'Maaf gambar belum di preprocessing';
-    msgbox(H,'Warning','warn');
-else
-     % Crop Citra (Memotong Citra)
-    Crop = imcrop(FiltMed3x3,[105.5 9.5 193 106]);
+    % Crop Citra (Memotong Citra)
+    Crop = imcrop(fmed3x3,[105.5 9.5 193 106]);
     
     % Merubah ukuran crop citra ke ukuran 75x150 pixel
     Resize = imresize(Crop,[75 150]); 
@@ -236,6 +222,7 @@ else
     
     setappdata(mydatacontainer,'resize_img',Resize);
 end
+
 
 % --- Executes on button press in btnBiner.
 function btnBiner_Callback(hObject, eventdata, handles)
@@ -249,23 +236,11 @@ else
     %% Segmentasi
     Biner = imbinarize(Resize,0.8);
     Invers = imcomplement(Biner);
-    axes(handles.axes5);
-    imshow(Invers),title('Citra Biner',...
-        'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
-    setappdata(mydatacontainer,'invers_biner',Invers);
-end
-
-% --- Executes on button press in btnMorphologi.
-function btnMorphologi_Callback(hObject, eventdata, handles)
-mydatacontainer = getappdata(0,'datacontainer');
-Invers = getappdata(mydatacontainer,'invers_biner');
-if isempty(Invers)
-    H = 'Maaf gambar belum di segmentasi';
-    msgbox(H,'Warning','warn');
-else
+    
     %% Operasi Morfologi
     Opening = bwmorph(Invers,'open');
     Closing = bwmorph(Opening,'close');
+    
     axes(handles.axes5);
     imshow(Closing),title('Morfologi',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
@@ -277,7 +252,7 @@ function btnEkstraksi_Callback(hObject, eventdata, handles)
 mydatacontainer = getappdata(0,'datacontainer');
 Closing = getappdata(mydatacontainer,'morphologi');
 if isempty(Closing)
-    H = 'Maaf gambar belum di morfologi';
+    H = 'Maaf gambar belum di convert menjadi biner';
     msgbox(H,'Warning','warn');
 else
     % Ekstraksi Bentuk
@@ -286,10 +261,8 @@ else
     perimeter = ekstraksi.Perimeter;
     minor_axis = ekstraksi.MinorAxisLength;
     mayor_axis = ekstraksi.MajorAxisLength;
-    compactness = (perimeter^2)/area;
-    roundness = (4*pi*area)/(perimeter^2);    
+    compactness = (perimeter^2)/area;    
     rectangularity = area/(mayor_axis*minor_axis);
-    elongation = 1 - (minor_axis/mayor_axis);
     Data_Uji = [roundness compactness rectangularity elongation]
     
     ciri_bentuk = cell(8,2);

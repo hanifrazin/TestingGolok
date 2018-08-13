@@ -295,8 +295,8 @@ else
     % Akurasi Latih : 100.00%
     % Akurasi Uji : 66.67%
     
-    latih = [area perimeter solidity];
-    uji =   [area_uji perimeter_uji solidity_uji];
+    latih = [area perimeter minor_axis rpd prp solidity];
+    uji =   [area_uji perimeter_uji minor_axis_uji rpd_uji prp_uji solidity_uji];
     
 %     latih = [area co solidity elongation prp rpd];
 %     uji =  [area_uji co_uji solidity_uji elongation_uji prp_uji rpd_uji];
