@@ -292,12 +292,12 @@ elseif isequal(tester,11)
     latih = [area perimeter ro];
     uji = [area_uji perimeter_uji ro_uji];
 else
-    % Akurasi Latih : 100.00%
+    % Akurasi Latih : 100.00% kalo ada rpd, prp, dan area
     % Akurasi Uji : 66.67%
-    
+%     
     latih = [area perimeter solidity];
     uji =   [area_uji perimeter_uji solidity_uji];
-    
+
 %     latih = [area co solidity elongation prp rpd];
 %     uji =  [area_uji co_uji solidity_uji elongation_uji prp_uji rpd_uji];
     
