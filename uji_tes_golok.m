@@ -4,24 +4,24 @@
 clc;clear all;close all;
 
 image_folder = 'data latih 3';
-image_folder_uji = 'data latih 3';
-
-% class=zeros(18,1);
-% class(1:6,1)=1;
-% class(7:12,1)=2;
-% class(13:18,1)=3;
-% 
-% class_uji=class;
+image_folder_uji = 'data uji 3';
 
 class=zeros(18,1);
 class(1:6,1)=1;
 class(7:12,1)=2;
 class(13:18,1)=3;
-class_uji = class;
-% class_uji=zeros(12,1);
-% class_uji(1:4,1)=1;
-% class_uji(5:8,1)=2;
-% class_uji(9:12,1)=3;
+% 
+% class_uji=class;
+
+if isequal(image_folder_uji,'data latih 3')
+    class_uji = class;
+else
+    class_uji=zeros(12,1);
+    class_uji(1:4,1)=1;
+    class_uji(5:8,1)=2;
+    class_uji(9:12,1)=3;
+end
+
 
 filenames = dir(fullfile(image_folder, '*.jpg'));
 total_images = numel(filenames);
@@ -170,8 +170,8 @@ for n = 1:total_images_uji
     elongation_uji(n) = 1 - (minor_axis_uji(n)/mayor_axis_uji(n));
 end
 
-trainset = [ro co rect elongation];
-testset  = [ro_uji co_uji rect_uji elongation_uji];
+trainset = [area perimeter solidity ro];
+testset =  [area_uji perimeter_uji solidity_uji ro_uji];
 % prepare class label for first run of svm
 
 

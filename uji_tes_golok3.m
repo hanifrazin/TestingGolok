@@ -3,18 +3,22 @@
 
 clc;clear all;close all;
 
-image_folder = 'data latih 3';
-image_folder_uji = 'data uji 3';
+image_folder = 'train golok';
+image_folder_uji = 'test golok';
 
 class=zeros(18,1);
 class(1:6,1)=1;
 class(7:12,1)=2;
 class(13:18,1)=3;
 
-class_uji=zeros(12,1);
-class_uji(1:4,1)=1;
-class_uji(5:8,1)=2;
-class_uji(9:12,1)=3;
+if isequal(image_folder_uji,'train golok')
+    class_uji = class;
+else
+    class_uji=zeros(12,1);
+    class_uji(1:4,1)=1;
+    class_uji(5:8,1)=2;
+    class_uji(9:12,1)=3;
+end
 
 filenames = dir(fullfile(image_folder, '*.jpg'));
 total_images = numel(filenames);
@@ -45,28 +49,31 @@ conv_area = zeros(total_images,1);
 conv_hull = zeros(total_images,1);
 level = zeros(total_images,1);
 
+SE = ones(3);
+SE2 = [1 1 1;1 1 1;1 1 1]
+
 for n = 1:total_images
     full_name = fullfile(image_folder, filenames(n).name);
     Img = imread(full_name);
 
     Gray = rgb2gray(Img);
-    Contrast = imadjust(Gray,stretchlim(Gray),[]);
-    MedImg = medfilt2(Contrast);
+%     Contrast = imadjust(Gray,stretchlim(Gray),[]);
+    MedImg = medfilt2(Gray);
     Crop = imcrop(MedImg,[105.5 9.5 193 106]);
     Resize = imresize(Crop,[75 150]);
 %     Biner = Resize < 200;
 %     Biner = not(Resize > 200);
     level(n) = graythresh(Resize);
     Biner = not(imbinarize(Resize,0.8));
-    SE = ones(4);
-    Close2 = imclose(Biner,SE);
-    Open2 = imopen(Close2,SE);
+    
+    Open2 = imopen(Biner,SE2);
+    Close2 = imclose(Open2,SE2);
     Open = bwmorph(Biner,'open');
     Close = bwmorph(Open,'close');
 %     figure,imshow(Open);title(filenames(n).name);
     conv = bwconvhull(Close);
     Label = bwlabel(Close);
-    stats = regionprops(Close,'all');
+    stats = regionprops(Close2,'all');
     conv_stats = regionprops(conv,'Perimeter');
     area(n) = stats.Area;
     perimeter(n) = stats.Perimeter;
@@ -89,7 +96,7 @@ for n = 1:total_images
     prp(n) = perimeter(n)/(mayor_axis(n)+minor_axis(n));
     narrow(n) = diameter(n)/mayor_axis(n);
     slim(n) = mayor_axis(n)/minor_axis(n);
-    rpd(n) = perimeter(n)/diameter(n);
+    rpd(n) = perimeter(n)/mayor_axis(n);
     
     rect(n) = area(n)/(minor_axis(n)*mayor_axis(n));
     rect2(n) = (minor_axis(n)*mayor_axis(n))/area(n);
@@ -132,8 +139,8 @@ for n = 1:total_images_uji
     Img_uji = imread(full_name_uji);
     
     Gray_uji = rgb2gray(Img_uji);
-    Contrast_uji = imadjust(Gray_uji,stretchlim(Gray_uji),[]);
-    MedImg_uji = medfilt2(Contrast_uji);
+%     Contrast_uji = imadjust(Gray_uji,stretchlim(Gray_uji),[]);
+    MedImg_uji = medfilt2(Gray_uji);
     Crop_uji = imcrop(MedImg_uji,[105.5 9.5 193 106]);
     Resize_uji = imresize(Crop_uji,[75 150]); 
 %     Biner_uji = Resize_uji < 200;
@@ -141,9 +148,8 @@ for n = 1:total_images_uji
     level_uji(n) = graythresh(Resize_uji);
     Biner_uji = not(imbinarize(Resize_uji,0.8));
     
-    SE_uji = ones(5);
-    Close_uji2 = imclose(Biner_uji,SE_uji);
-    Open_uji2 = imopen(Close_uji2,SE_uji);
+    Open_uji2 = imopen(Biner_uji,SE2);
+    Close_uji2 = imclose(Open_uji2,SE2);
     Open_uji = bwmorph(Biner_uji,'open');
     Close_uji = bwmorph(Open_uji,'close');
     
@@ -151,7 +157,7 @@ for n = 1:total_images_uji
 %     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
 %     imwrite(Open_uji,path_uji,'jpg')
     conv_uji = bwconvhull(Close_uji);
-    stats_uji = regionprops(Close_uji,'all');
+    stats_uji = regionprops(Close_uji2,'all');
     conv_stats_uji = regionprops(conv_uji,'Perimeter');
     area_uji(n) = stats_uji.Area;
     perimeter_uji(n) = stats_uji.Perimeter;
@@ -171,7 +177,7 @@ for n = 1:total_images_uji
     solidity_uji(n) = stats_uji.Solidity;
     diameter_uji(n) = stats_uji.EquivDiameter;
     
-    rpd_uji(n) = perimeter_uji(n)/diameter_uji(n);
+    rpd_uji(n) = perimeter_uji(n)/mayor_axis_uji(n);
     prp_uji(n) = perimeter_uji(n)/(mayor_axis_uji(n)+minor_axis_uji(n));
     narrow_uji(n) = diameter_uji(n)/mayor_axis_uji(n);
     
@@ -186,7 +192,7 @@ end
 % testset  = [area_uji rect_uji co_uji solidity_uji prp_uji rpd_uji];
 % 66.67%
 
-tester = 0;
+tester = 1;
 latih = 0;
 uji = 0;
 if isequal(tester,1)
@@ -196,8 +202,11 @@ if isequal(tester,1)
     % Akurasi Latih : 94.44%
     % Akurasi Uji : 75%
 
-    latih = [area perimeter diameter ro];
-    uji =  [area_uji perimeter_uji diameter_uji ro_uji];
+    latih = [area perimeter solidity ro];
+    uji =  [area_uji perimeter_uji solidity_uji ro_uji];
+    
+    %     latih = [area perimeter diameter solidity];88.89%
+%     uji =  [area_uji perimeter_uji diameter_uji solidity_uji];83.33%
 elseif isequal(tester,2)
     % Ekstraksi dan Seleksi Fitur untuk Klasifikasi Sel Epitel dengan Sel Radang pada Citra Pap Smear
     % Penulis :	Rahadian Kurniawan
@@ -224,7 +233,7 @@ elseif isequal(tester,4)
     % Akurasi Uji : 75%
     
     latih = [ro slim ro3 solidity];
-    uji = [ro_uji slim_uji ro3_uji solidity_uji];
+    uji = [ro_uji slim_uji ro3_uji solidity_uji rpd_uji prp_uji];
 elseif isequal(tester,5)
     % SELEKSI FITUR MENGGUNAKAN EKSTRAKSI FITUR BENTUK, WARNA, DAN TEKSTUR
     % DALAM SISTEM TEMU KEMBALI CITRA DAUN
@@ -295,8 +304,8 @@ else
     % Akurasi Latih : 100.00% kalo ada rpd, prp, dan area
     % Akurasi Uji : 66.67%
 %     
-    latih = [area perimeter solidity];
-    uji =   [area_uji perimeter_uji solidity_uji];
+    latih = [area perimeter co];
+    uji =   [area_uji perimeter_uji co_uji];
 
 %     latih = [area co solidity elongation prp rpd];
 %     uji =  [area_uji co_uji solidity_uji elongation_uji prp_uji rpd_uji];
@@ -306,28 +315,33 @@ else
 end
 
 tester
-trainset = latih;
-testset  = uji;
+% trainset = latih;
+% testset  = uji;
 
 
 % load BayesModelGolok
 % Testing
-BayesModel = fitcnb(trainset,class);
+BayesModel = fitcnb(latih,class);
 
 % save BayesGolok.mat BayesModel
 
-isBayes = predict(BayesModel,trainset);
-isBayes2 = predict(BayesModel,testset);
-% disp(['   Bayes ', 'Valid '])
-% disp([isBayes class_uji])
+isBayes = predict(BayesModel,latih);
+isBayes2 = predict(BayesModel,uji);
+
 % salah_Bayes = sum(isBayes~=class_uji)
 % benar_Bayes = sum(isBayes==class_uji)
 % akurasi_Bayes = benar_Bayes/numel(class_uji)
 % disp(['accuracy Bayes = ',num2str(akurasi_Bayes*100,'%.2f'),'%'])
 C_train=confusionmat(class,isBayes)
+benar_train = sum(diag(C_train))
+salah_train = total_images-sum(diag(C_train))
 Akurasi_train = 100*(sum(diag(C_train))./sum(C_train(:)));  
+Table_train = table(isBayes,class)
 disp(['accuracy Data Latih Bayes = ',num2str(Akurasi_train,'%.2f'),'%'])
 
 C_test=confusionmat(class_uji,isBayes2)
+benar_test = sum(diag(C_test))
+salah_test = total_images_uji-sum(diag(C_test))
 Akurasi_test = 100*(sum(diag(C_test))./sum(C_test(:)));  
+Table_test = table(isBayes2,class_uji)
 disp(['accuracy Data uji Bayes = ',num2str(Akurasi_test,'%.2f'),'%'])
