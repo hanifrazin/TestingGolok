@@ -6,18 +6,20 @@ clc;clear all;close all;
 image_folder = 'train golok';
 image_folder_uji = 'test golok';
 
-class=zeros(18,1);
+class=zeros(20,1);
 class(1:6,1)=1;
 class(7:12,1)=2;
 class(13:18,1)=3;
+class(19:20,1)=6;
 
 if isequal(image_folder_uji,'train golok')
     class_uji = class;
 else
-    class_uji=zeros(12,1);
+    class_uji=zeros(13,1);
     class_uji(1:4,1)=1;
     class_uji(5:8,1)=2;
     class_uji(9:12,1)=3;
+    class_uji(13,1)=6;
 end
 
 filenames = dir(fullfile(image_folder, '*.jpg'));
@@ -153,7 +155,7 @@ for n = 1:total_images_uji
     Open_uji = bwmorph(Biner_uji,'open');
     Close_uji = bwmorph(Open_uji,'close');
     
-%     figure,imshow(Open_uji);title(filenames_uji(n).name);
+    figure,imshow(Close_uji2);title(filenames_uji(n).name);
 %     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
 %     imwrite(Open_uji,path_uji,'jpg')
     conv_uji = bwconvhull(Close_uji);
@@ -192,7 +194,7 @@ end
 % testset  = [area_uji rect_uji co_uji solidity_uji prp_uji rpd_uji];
 % 66.67%
 
-tester = 1;
+tester = 6;
 latih = 0;
 uji = 0;
 if isequal(tester,1)
@@ -248,8 +250,8 @@ elseif isequal(tester,6)
     % Fish Shape Recognition using Multiple Shape Descriptors
     % Penulis :	Moumita Ghosh
     % Tahun	: 2013
-    % Akurasi Latih : 83.33%
-    % Akurasi Uji : 75%
+    % Akurasi Latih : 94.74%
+    % Akurasi Uji : 83.33%
     
     latih = [eccentricity mayor_axis minor_axis solidity];
     uji = [eccentricity_uji mayor_axis_uji minor_axis_uji solidity_uji];
