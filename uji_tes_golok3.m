@@ -6,24 +6,29 @@ clc;clear all;close all;
 image_folder = 'train golok';
 image_folder_uji = 'test golok';
 
-class=zeros(20,1);
+filenames = dir(fullfile(image_folder, '*.jpg'));
+total_images = numel(filenames);
+
+filenames_uji = dir(fullfile(image_folder_uji, '*.jpg'));
+total_images_uji = numel(filenames_uji);
+
+class=zeros(total_images,1);
 class(1:6,1)=1;
 class(7:12,1)=2;
 class(13:18,1)=3;
-class(19:20,1)=6;
+class(19:24,1)=4;
+class(25:total_images,1)=6;
 
 if isequal(image_folder_uji,'train golok')
     class_uji = class;
 else
-    class_uji=zeros(13,1);
+    class_uji=zeros(total_images_uji,1);
     class_uji(1:4,1)=1;
     class_uji(5:8,1)=2;
     class_uji(9:12,1)=3;
-    class_uji(13,1)=6;
+    class_uji(13:16,1)=4;
+    class_uji(17:total_images_uji,1)=6;
 end
-
-filenames = dir(fullfile(image_folder, '*.jpg'));
-total_images = numel(filenames);
 
 area = zeros(total_images,1);
 perimeter = zeros(total_images,1);
@@ -72,7 +77,11 @@ for n = 1:total_images
     Close2 = imclose(Open2,SE2);
     Open = bwmorph(Biner,'open');
     Close = bwmorph(Open,'close');
-%     figure,imshow(Open);title(filenames(n).name);
+%     
+%     if ((n>=19) && (n<=24))
+%         figure,imshow(Close2);title(filenames(n).name);
+%     end
+    
     conv = bwconvhull(Close);
     Label = bwlabel(Close);
     stats = regionprops(Close2,'all');
@@ -105,10 +114,6 @@ for n = 1:total_images
     elongation(n) = 1 - (minor_axis(n)/mayor_axis(n));
     
 end
-
-
-filenames_uji = dir(fullfile(image_folder_uji, '*.jpg'));
-total_images_uji = numel(filenames_uji);
 
 area_uji = zeros(total_images_uji,1);
 perimeter_uji = zeros(total_images_uji,1);
@@ -155,7 +160,9 @@ for n = 1:total_images_uji
     Open_uji = bwmorph(Biner_uji,'open');
     Close_uji = bwmorph(Open_uji,'close');
     
-    figure,imshow(Close_uji2);title(filenames_uji(n).name);
+    if (n>=13) && (n<=16)
+        figure,imshow(Close_uji2);title(filenames_uji(n).name);
+    end
 %     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
 %     imwrite(Open_uji,path_uji,'jpg')
     conv_uji = bwconvhull(Close_uji);
@@ -235,7 +242,7 @@ elseif isequal(tester,4)
     % Akurasi Uji : 75%
     
     latih = [ro slim ro3 solidity];
-    uji = [ro_uji slim_uji ro3_uji solidity_uji rpd_uji prp_uji];
+    uji = [ro_uji slim_uji ro3_uji solidity_uji];
 elseif isequal(tester,5)
     % SELEKSI FITUR MENGGUNAKAN EKSTRAKSI FITUR BENTUK, WARNA, DAN TEKSTUR
     % DALAM SISTEM TEMU KEMBALI CITRA DAUN
