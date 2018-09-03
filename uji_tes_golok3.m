@@ -160,7 +160,7 @@ for n = 1:total_images_uji
     Open_uji = bwmorph(Biner_uji,'open');
     Close_uji = bwmorph(Open_uji,'close');
     
-    if (n>=13) && (n<=16)
+    if (n>=17) && (n<=total_images_uji)
         figure,imshow(Close_uji2);title(filenames_uji(n).name);
     end
 %     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
