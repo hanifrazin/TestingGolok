@@ -17,7 +17,8 @@ class(1:6,1)=1;
 class(7:12,1)=2;
 class(13:18,1)=3;
 class(19:24,1)=4;
-class(25:total_images,1)=6;
+class(25:30,1)=5;
+class(31:total_images,1)=6;
 
 if isequal(image_folder_uji,'train golok')
     class_uji = class;
@@ -27,7 +28,8 @@ else
     class_uji(5:8,1)=2;
     class_uji(9:12,1)=3;
     class_uji(13:16,1)=4;
-    class_uji(17:total_images_uji,1)=6;
+    class_uji(17:20,1)=5;
+    class_uji(21:total_images_uji,1)=6;
 end
 
 area = zeros(total_images,1);
@@ -78,9 +80,9 @@ for n = 1:total_images
     Open = bwmorph(Biner,'open');
     Close = bwmorph(Open,'close');
 %     
-%     if ((n>=19) && (n<=24))
-%         figure,imshow(Close2);title(filenames(n).name);
-%     end
+    if (n>=25) && (n<=30)
+        figure,imshow(Close2);title(filenames(n).name);
+    end
     
     conv = bwconvhull(Close);
     Label = bwlabel(Close);
@@ -160,7 +162,7 @@ for n = 1:total_images_uji
     Open_uji = bwmorph(Biner_uji,'open');
     Close_uji = bwmorph(Open_uji,'close');
     
-    if (n>=17) && (n<=total_images_uji)
+    if (n>=17) && (n<=19)
         figure,imshow(Close_uji2);title(filenames_uji(n).name);
     end
 %     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
