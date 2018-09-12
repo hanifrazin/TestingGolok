@@ -162,9 +162,9 @@ for n = 1:total_images_uji
     Open_uji = bwmorph(Biner_uji,'open');
     Close_uji = bwmorph(Open_uji,'close');
     
-    if (n>=17) && (n<=19)
-        figure,imshow(Close_uji2);title(filenames_uji(n).name);
-    end
+%     if (n>=17) && (n<=20)
+%         figure,imshow(Close_uji2);title(filenames_uji(n).name);
+%     end
 %     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
 %     imwrite(Open_uji,path_uji,'jpg')
     conv_uji = bwconvhull(Close_uji);
@@ -261,9 +261,15 @@ elseif isequal(tester,6)
     % Tahun	: 2013
     % Akurasi Latih : 94.74%
     % Akurasi Uji : 83.33%
+    solid = area./conv_area;
+    solid_uji = area_uji./conv_area_uji;
+    c = sqrt(mayor_axis.^2 - minor_axis.^2);
+    c_uji = sqrt(mayor_axis_uji.^2 - minor_axis_uji.^2);
+    eccen = c./mayor_axis;
+    eccen_uji = c_uji./mayor_axis_uji;
+    latih = [eccen mayor_axis minor_axis solid];
+    uji = [eccen_uji mayor_axis_uji minor_axis_uji solid_uji];
     
-    latih = [eccentricity mayor_axis minor_axis solidity];
-    uji = [eccentricity_uji mayor_axis_uji minor_axis_uji solidity_uji];
 elseif isequal(tester,7)
     % Identifikasi Citra Daun Menggunakan Morfologi, Local Binary Patterns dan Convex Hulls
     % Penulis :	Desta Sandya Prasvita
@@ -334,10 +340,10 @@ tester
 % Testing
 BayesModel = fitcnb(latih,class);
 
-% save BayesGolok.mat BayesModel
+save BayesGolok.mat BayesModel
 
-isBayes = predict(BayesModel,latih);
-isBayes2 = predict(BayesModel,uji);
+[isBayes,posterior] = predict(BayesModel,latih);
+[isBayes2,posterior2] = predict(BayesModel,uji);
 
 % salah_Bayes = sum(isBayes~=class_uji)
 % benar_Bayes = sum(isBayes==class_uji)
@@ -350,9 +356,16 @@ Akurasi_train = 100*(sum(diag(C_train))./sum(C_train(:)));
 Table_train = table(isBayes,class)
 disp(['accuracy Data Latih Bayes = ',num2str(Akurasi_train,'%.2f'),'%'])
 
-C_test=confusionmat(class_uji,isBayes2)
+C_test=confusionmat(class_uji(1:20),isBayes2(1:20))
 benar_test = sum(diag(C_test))
-salah_test = total_images_uji-sum(diag(C_test))
+salah_test = sum(isBayes2(1:20)~=class_uji(1:20))
 Akurasi_test = 100*(sum(diag(C_test))./sum(C_test(:)));  
-Table_test = table(isBayes2,class_uji)
+Table_test = table(isBayes2(1:20),class_uji(1:20))
 disp(['accuracy Data uji Bayes = ',num2str(Akurasi_test,'%.2f'),'%'])
+
+C_test_non=confusionmat(class_uji(21:24),isBayes2(21:24))
+benar_test_non = sum(diag(C_test_non))
+salah_test_non = numel(C_test_non)-sum(diag(C_test_non))
+Akurasi_test_non = 100*(sum(diag(C_test_non))./sum(C_test_non(:)));  
+Table_test_non = table(isBayes2(21:24),class_uji(21:24))
+disp(['accuracy Data uji Bayes Non Betawi = ',num2str(Akurasi_test_non,'%.2f'),'%'])

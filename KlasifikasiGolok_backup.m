@@ -22,7 +22,7 @@ function varargout = KlasifikasiGolok(varargin)
 
 % Edit the above text to modify the response to help KlasifikasiGolok
 
-% Last Modified by GUIDE v2.5 12-Sep-2018 23:29:30
+% Last Modified by GUIDE v2.5 12-Jul-2018 22:49:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,12 +61,15 @@ arrayfun(@cla,findall(0,'type','axes'))
 setappdata(0,'datacontainer',hObject);
 movegui(hObject,'onscreen')% To display application onscreen
 movegui(hObject,'center')  % To display application in the center of screen
-
 axes(handles.axes1)
 cla('reset')
 set(gca,'XTick',[])
 set(gca,'YTick',[])
 axes(handles.axes2)
+cla('reset')
+set(gca,'XTick',[])
+set(gca,'YTick',[])
+axes(handles.axes3)
 cla('reset')
 set(gca,'XTick',[])
 set(gca,'YTick',[])
@@ -79,9 +82,9 @@ cla('reset')
 set(gca,'XTick',[])
 set(gca,'YTick',[])
 set(handles.uitable3,'Data',[])
-set(handles.uitable6,'Data',[])
+set(handles.uitable5,'Data',[])
+set(handles.edit_Name,'String',[])
 set(handles.edit_Hasil,'String',[])
-
 clear all
 clc
 
@@ -156,6 +159,7 @@ if ~isequal(filename,0)
     axes(handles.axes1);
     imshow(handles.RGB_Img),title('Citra RGB',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
+    set(handles.edit_Name,'String',filename); 
     guidata(hObject,handles);
     mydatacontainer = getappdata(0,'datacontainer');
     setappdata(mydatacontainer,'gambaroriginal',handles.RGB_Img);
@@ -163,8 +167,8 @@ else
     return;
 end
 
-% --- Executes on button press in btnPreProcess.
-function btnPreProcess_Callback(hObject, eventdata, handles)
+% --- Executes on button press in btnGray.
+function btnGray_Callback(hObject, eventdata, handles)
 if isempty(get(handles.axes1,'Children'))
     H = 'Silahkan input gambar terlebih dahulu';
     msgbox(H,'Warning','warn');
@@ -179,21 +183,58 @@ else
     imshow(Gray),title('Citra Grayscale',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     
+    axes(handles.axes3);
+    imhist(Gray);ylim([0,200]);xlim([0,255]);
+    F = getframe(handles.axes3);
+    Image = frame2im(F);
+    imwrite(Image, 'Contrast.jpg');
+    setappdata(mydatacontainer,'preprocessing',Gray);
+end
+
+% --- Executes on button press in btnPreProcess.
+function btnPreProcess_Callback(hObject, eventdata, handles)
+if isempty(get(handles.axes2,'Children'))
+    H = 'Maaf gambar belum diconvert menjadi Grayscale';
+    msgbox(H,'Warning','warn');
+else
+    mydatacontainer = getappdata(0,'datacontainer');
+    Gray = getappdata(mydatacontainer,'preprocessing');
+    
+    % Meningkatkan kontras dengan Contrast Stretching
+    Constretch = imadjust(Gray,stretchlim(Gray),[]);
+    
+    axes(handles.axes2);
+    imshow(Constretch),title('Perbaikan Citra',...
+        'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
+    axes(handles.axes3);
+    imhist(Constretch);ylim([0,200]);xlim([0,255]);
+  
+    % Menghaluskan Citra
+    fmed3x3 = ordfilt2(Gray,5,ones(3,3));
     % Crop Citra (Memotong Citra)
-    Crop = imcrop(Gray,[105.5 9.5 193 106]);
+    Crop = imcrop(fmed3x3,[105.5 9.5 193 106]);
     
     % Merubah ukuran crop citra ke ukuran 75x150 pixel
     Resize = imresize(Crop,[75 150]); 
-    
-    % Menghaluskan Citra
-    fmed3x3 = ordfilt2(Resize,5,ones(3,3));
-    
     axes(handles.axes4);
-    imshow(fmed3x3),title('Crop Citra',...
+    imshow(Resize),title('Crop Citra',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     
+    setappdata(mydatacontainer,'resize_img',Resize);
+end
+
+
+% --- Executes on button press in btnBiner.
+function btnBiner_Callback(hObject, eventdata, handles)
+if isempty(get(handles.axes4,'Children'))
+    H = 'Maaf gambar belum di crop';
+    msgbox(H,'Warning','warn');
+else
+    mydatacontainer = getappdata(0,'datacontainer');
+    Resize = getappdata(mydatacontainer,'resize_img');
+    
     %% Segmentasi
-    Biner = imbinarize(fmed3x3,0.8);
+    Biner = imbinarize(Resize,0.8);
     Invers = imcomplement(Biner);
     
     %% Operasi Morfologi
@@ -206,11 +247,6 @@ else
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     setappdata(mydatacontainer,'morphologi',Close);
 end
-
-
-% --- Executes on button press in btnExit.
-function btnExit_Callback(hObject, eventdata, handles)
-delete(handles.figure1)
 
 % --- Executes on button press in btnEkstraksi.
 function btnEkstraksi_Callback(hObject, eventdata, handles)
@@ -236,10 +272,10 @@ else
     ciri_bentuk{2,1} = 'Major Axis Length';
     ciri_bentuk{3,1} = 'Minor Axis Length';
     ciri_bentuk{4,1} = 'Solidity';
-    ciri_bentuk{1,2} = eccentricity;
-    ciri_bentuk{2,2} = mayor_axis;
-    ciri_bentuk{3,2} = minor_axis;
-    ciri_bentuk{4,2} = solidity;
+    ciri_bentuk{1,2} = num2str(eccentricity);
+    ciri_bentuk{2,2} = num2str(mayor_axis);
+    ciri_bentuk{3,2} = num2str(minor_axis);
+    ciri_bentuk{4,2} = num2str(solidity);
     
     row_cell = cell(4,1);
     for i = 1:4
@@ -263,23 +299,15 @@ else
     load('BayesGolok.mat')
     [PrediksiBayes,Posterior] = predict(BayesModel,uji);
     
-    val_posterior = cell(5,2);
-    val_posterior{1,1} = 'Golok Gablogan';
-    val_posterior{2,1} = 'Golok Sembelih';
-    val_posterior{3,1} = 'Golok Sorenan';
-    val_posterior{4,1} = 'Golok Ujung Turun';
-    val_posterior{5,1} = 'Golok Petok';
-    val_posterior{1,2} = num2str(Posterior(1));
-    val_posterior{2,2} = num2str(Posterior(2));
-    val_posterior{3,2} = num2str(Posterior(3));
-    val_posterior{4,2} = num2str(Posterior(4));
-    val_posterior{5,2} = num2str(Posterior(5));
-    set(handles.uitable6,'Data',val_posterior),
-    
-    numb_row_cell = cell(5,1);
-    for i = 1:5
-        numb_row_cell{i} = num2str(i);
-    end
+    Posterior_trans = transpose(Posterior);
+    val_posterior = cell(1,6);
+    val_posterior{1,1} = Posterior_trans(1);
+    val_posterior{1,2} = Posterior_trans(2);
+    val_posterior{1,3} = Posterior_trans(3);
+    val_posterior{1,4} = Posterior_trans(4);
+    val_posterior{1,5} = Posterior_trans(5);
+    val_posterior{1,6} = Posterior_trans(6);
+    set(handles.uitable5,'Data',val_posterior),
     
     if isequal(Posterior(1,1),max(Posterior))
         hasil = 'Gablogan';
@@ -291,7 +319,7 @@ else
         hasil = 'Ujung Turun';
     elseif isequal(Posterior(1,5),max(Posterior))
         hasil = 'Petok';
-    else
+    elseif isequal(Posterior(1,6),max(Posterior))
         hasil = 'Bukan Golok Betawi';
     end
     set(handles.edit_Hasil,'String',hasil)
@@ -306,29 +334,32 @@ for ii = 1:numel(fns)
 end
 arrayfun(@cla,findall(0,'type','axes'))
 setappdata(0,'datacontainer',hObject);
-
 axes(handles.axes1)
 cla('reset')
 set(gca,'XTick',[])
 set(gca,'YTick',[])
-
 axes(handles.axes2)
 cla('reset')
 set(gca,'XTick',[])
 set(gca,'YTick',[])
-
+axes(handles.axes3)
+cla('reset')
+set(gca,'XTick',[])
+set(gca,'YTick',[])
 axes(handles.axes4)
 cla('reset')
 set(gca,'XTick',[])
 set(gca,'YTick',[])
-
 axes(handles.axes5)
 cla('reset')
 set(gca,'XTick',[])
 set(gca,'YTick',[])
-
-set(handles.uitable3,'Data',cell(size(get(handles.uitable3,'Data'))))
-set(handles.uitable6,'Data',cell(size(get(handles.uitable6,'Data'))))
+set(handles.uitable3,'Data',[])
+set(handles.uitable5,'Data',[])
+set(handles.edit_Name,'String',[])
 set(handles.edit_Hasil,'String',[])
 clear all
 clc
+
+% --- Executes on button press in btnKeluar.
+function btnKeluar_Callback(hObject, eventdata, handles)

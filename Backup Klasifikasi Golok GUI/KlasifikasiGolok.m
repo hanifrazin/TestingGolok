@@ -22,7 +22,7 @@ function varargout = KlasifikasiGolok(varargin)
 
 % Edit the above text to modify the response to help KlasifikasiGolok
 
-% Last Modified by GUIDE v2.5 12-Sep-2018 23:29:30
+% Last Modified by GUIDE v2.5 12-Jul-2018 22:49:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,7 +61,6 @@ arrayfun(@cla,findall(0,'type','axes'))
 setappdata(0,'datacontainer',hObject);
 movegui(hObject,'onscreen')% To display application onscreen
 movegui(hObject,'center')  % To display application in the center of screen
-
 axes(handles.axes1)
 cla('reset')
 set(gca,'XTick',[])
@@ -81,7 +80,6 @@ set(gca,'YTick',[])
 set(handles.uitable3,'Data',[])
 set(handles.uitable6,'Data',[])
 set(handles.edit_Hasil,'String',[])
-
 clear all
 clc
 
@@ -163,6 +161,25 @@ else
     return;
 end
 
+% --- Executes on button press in btnGray.
+function btnGray_Callback(hObject, eventdata, handles)
+if isempty(get(handles.axes1,'Children'))
+    H = 'Silahkan input gambar terlebih dahulu';
+    msgbox(H,'Warning','warn');
+else
+    mydatacontainer = getappdata(0,'datacontainer');
+    handles.RGB_Img = getappdata(mydatacontainer,'gambaroriginal');
+    
+    % Konversi RGB ke Grayscale
+    Gray = rgb2gray(handles.RGB_Img);
+    
+    axes(handles.axes2);
+    imshow(Gray),title('Citra Grayscale',...
+        'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
+    
+    setappdata(mydatacontainer,'preprocessing',Gray);
+end
+
 % --- Executes on button press in btnPreProcess.
 function btnPreProcess_Callback(hObject, eventdata, handles)
 if isempty(get(handles.axes1,'Children'))
@@ -208,9 +225,29 @@ else
 end
 
 
-% --- Executes on button press in btnExit.
-function btnExit_Callback(hObject, eventdata, handles)
-delete(handles.figure1)
+% --- Executes on button press in btnBiner.
+function btnBiner_Callback(hObject, eventdata, handles)
+if isempty(get(handles.axes4,'Children'))
+    H = 'Maaf gambar belum di crop';
+    msgbox(H,'Warning','warn');
+else
+    mydatacontainer = getappdata(0,'datacontainer');
+    MedFilt = getappdata(mydatacontainer,'resize_img');
+    
+    %% Segmentasi
+    Biner = imbinarize(Resize,0.8);
+    Invers = imcomplement(Biner);
+    
+    %% Operasi Morfologi
+    SE = [1 1 1;1 1 1;1 1 1];
+    Open = imopen(Invers,SE);
+    Close = imclose(Open,SE);
+    
+    axes(handles.axes5);
+    imshow(Close),title('Morfologi',...
+        'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
+    setappdata(mydatacontainer,'morphologi',Close);
+end
 
 % --- Executes on button press in btnEkstraksi.
 function btnEkstraksi_Callback(hObject, eventdata, handles)
@@ -263,21 +300,23 @@ else
     load('BayesGolok.mat')
     [PrediksiBayes,Posterior] = predict(BayesModel,uji);
     
-    val_posterior = cell(5,2);
+    val_posterior = cell(6,2);
     val_posterior{1,1} = 'Golok Gablogan';
     val_posterior{2,1} = 'Golok Sembelih';
     val_posterior{3,1} = 'Golok Sorenan';
     val_posterior{4,1} = 'Golok Ujung Turun';
     val_posterior{5,1} = 'Golok Petok';
+    val_posterior{6,1} = 'Bukan Golok Betawi';
     val_posterior{1,2} = num2str(Posterior(1));
     val_posterior{2,2} = num2str(Posterior(2));
     val_posterior{3,2} = num2str(Posterior(3));
     val_posterior{4,2} = num2str(Posterior(4));
     val_posterior{5,2} = num2str(Posterior(5));
+    val_posterior{6,2} = num2str(Posterior(6));
     set(handles.uitable6,'Data',val_posterior),
     
-    numb_row_cell = cell(5,1);
-    for i = 1:5
+    numb_row_cell = cell(6,1);
+    for i = 1:6
         numb_row_cell{i} = num2str(i);
     end
     
@@ -291,7 +330,7 @@ else
         hasil = 'Ujung Turun';
     elseif isequal(Posterior(1,5),max(Posterior))
         hasil = 'Petok';
-    else
+    elseif isequal(Posterior(1,6),max(Posterior))
         hasil = 'Bukan Golok Betawi';
     end
     set(handles.edit_Hasil,'String',hasil)
@@ -332,3 +371,6 @@ set(handles.uitable6,'Data',cell(size(get(handles.uitable6,'Data'))))
 set(handles.edit_Hasil,'String',[])
 clear all
 clc
+
+% --- Executes on button press in btnKeluar.
+function btnKeluar_Callback(hObject, eventdata, handles)
