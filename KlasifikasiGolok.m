@@ -144,7 +144,7 @@ end
 
 % --- Executes on button press in btnBuka_Citra.
 function btnBuka_Citra_Callback(hObject, eventdata, handles)
-StartDir = 'test golok';
+StartDir = 'test golok_2';
 [filename, pathname] = uigetfile({'*.jpeg;*.jpg','File Citra (*.jpeg,*.jpg)';
                         '*.jpg','File jpeg (*.jpg)';
                         '*.*','Semua File (*.*)'},...
@@ -154,7 +154,7 @@ if ~isequal(filename,0)
     Img = imread(fullfile(pathname,filename));
     handles.RGB_Img = Img;
     axes(handles.axes1);
-    imshow(handles.RGB_Img),title('Citra RGB',...
+    imshow(handles.RGB_Img),title('Citra Asli',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     guidata(hObject,handles);
     mydatacontainer = getappdata(0,'datacontainer');
@@ -217,7 +217,7 @@ function btnEkstraksi_Callback(hObject, eventdata, handles)
 mydatacontainer = getappdata(0,'datacontainer');
 Closing = getappdata(mydatacontainer,'morphologi');
 if isempty(Closing)
-    H = 'Maaf gambar belum di convert menjadi biner';
+    H = 'Maaf gambar belum di proses';
     msgbox(H,'Warning','warn');
 else
     % Ekstraksi Bentuk
@@ -263,21 +263,23 @@ else
     load('BayesGolok.mat')
     [PrediksiBayes,Posterior] = predict(BayesModel,uji);
     
-    val_posterior = cell(5,2);
+    val_posterior = cell(6,2);
     val_posterior{1,1} = 'Golok Gablogan';
     val_posterior{2,1} = 'Golok Sembelih';
     val_posterior{3,1} = 'Golok Sorenan';
     val_posterior{4,1} = 'Golok Ujung Turun';
     val_posterior{5,1} = 'Golok Petok';
+    val_posterior{6,1} = 'Bukan Golok Betawi';
     val_posterior{1,2} = num2str(Posterior(1));
     val_posterior{2,2} = num2str(Posterior(2));
     val_posterior{3,2} = num2str(Posterior(3));
     val_posterior{4,2} = num2str(Posterior(4));
     val_posterior{5,2} = num2str(Posterior(5));
+    val_posterior{6,2} = num2str(Posterior(6));
     set(handles.uitable6,'Data',val_posterior),
     
-    numb_row_cell = cell(5,1);
-    for i = 1:5
+    numb_row_cell = cell(6,1);
+    for i = 1:6
         numb_row_cell{i} = num2str(i);
     end
     

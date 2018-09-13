@@ -3,8 +3,8 @@
 
 clc;clear all;close all;
 
-image_folder = 'train golok';
-image_folder_uji = 'test golok';
+image_folder = 'train golok_2';
+image_folder_uji = 'test golok_2';
 
 filenames = dir(fullfile(image_folder, '*.jpg'));
 total_images = numel(filenames);
@@ -13,23 +13,17 @@ filenames_uji = dir(fullfile(image_folder_uji, '*.jpg'));
 total_images_uji = numel(filenames_uji);
 
 class=zeros(total_images,1);
-class(1:6,1)=1;
-class(7:12,1)=2;
-class(13:18,1)=3;
-class(19:24,1)=4;
-class(25:30,1)=5;
-class(31:total_images,1)=6;
+class(1:5,1)=1;
+class(6:10,1)=2;
+class(11:15,1)=3;
+class(16:20,1)=4;
+class(21:25,1)=5;
+class(26:total_images,1)=6;
 
-if isequal(image_folder_uji,'train golok')
+class_uji = class;
+
+if isequal(image_folder_uji,'train golok_2')
     class_uji = class;
-else
-    class_uji=zeros(total_images_uji,1);
-    class_uji(1:4,1)=1;
-    class_uji(5:8,1)=2;
-    class_uji(9:12,1)=3;
-    class_uji(13:16,1)=4;
-    class_uji(17:20,1)=5;
-    class_uji(21:total_images_uji,1)=6;
 end
 
 area = zeros(total_images,1);
@@ -356,16 +350,16 @@ Akurasi_train = 100*(sum(diag(C_train))./sum(C_train(:)));
 Table_train = table(isBayes,class)
 disp(['accuracy Data Latih Bayes = ',num2str(Akurasi_train,'%.2f'),'%'])
 
-C_test=confusionmat(class_uji(1:20),isBayes2(1:20))
+C_test=confusionmat(class_uji(1:25),isBayes2(1:25))
 benar_test = sum(diag(C_test))
-salah_test = sum(isBayes2(1:20)~=class_uji(1:20))
+salah_test = sum(isBayes2(1:25)~=class_uji(1:25))
 Akurasi_test = 100*(sum(diag(C_test))./sum(C_test(:)));  
-Table_test = table(isBayes2(1:20),class_uji(1:20))
+Table_test = table(isBayes2(1:25),class_uji(1:25))
 disp(['accuracy Data uji Bayes = ',num2str(Akurasi_test,'%.2f'),'%'])
 
-C_test_non=confusionmat(class_uji(21:24),isBayes2(21:24))
+C_test_non=confusionmat(class_uji(26:30),isBayes2(26:30))
 benar_test_non = sum(diag(C_test_non))
-salah_test_non = numel(C_test_non)-sum(diag(C_test_non))
+salah_test_non = numel(class_uji(26:30))-sum(diag(C_test_non))
 Akurasi_test_non = 100*(sum(diag(C_test_non))./sum(C_test_non(:)));  
-Table_test_non = table(isBayes2(21:24),class_uji(21:24))
+Table_test_non = table(isBayes2(26:30),class_uji(26:30))
 disp(['accuracy Data uji Bayes Non Betawi = ',num2str(Akurasi_test_non,'%.2f'),'%'])
