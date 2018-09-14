@@ -74,7 +74,7 @@ for n = 1:total_images
     Open = bwmorph(Biner,'open');
     Close = bwmorph(Open,'close');
 %     
-%     if (n>=25) && (n<=30)
+%     if (n>=16) && (n<=20)
 %         figure,imshow(Close2);title(filenames(n).name);
 %     end
     
@@ -88,15 +88,15 @@ for n = 1:total_images
     mayor_axis(n) = stats.MajorAxisLength;
     convex_perim(n) = conv_stats.Perimeter;
     convexity(n) = convex_perim(n)/perimeter(n);
-    co(n) = (perimeter(n)^2)/area(n);
-    co2(n) = (perimeter(n)^2)/(4*pi*area(n));
+    co(n) = (perimeter(n).^2)/area(n);
+    co2(n) = (perimeter(n).^2)/(4*pi*area(n));
     conv_area(n) = stats.ConvexArea;
     conv_hull(n) = conv_area(n)-area(n);
-    ro(n) = (4*pi*area(n))/(perimeter(n)^2);
-    ro2(n) = (4*pi*area(n))/(convex_perim(n)^2);
-    ro3(n) = (4*area(n))/(pi*(mayor_axis(n)^2));
+    ro(n) = (4*pi*area(n))/(perimeter(n).^2);
+    ro2(n) = (4*pi*area(n))/(convex_perim(n).^2);
+    ro3(n) = (4*area(n))/(pi*(mayor_axis(n).^2));
     eccentricity(n) = stats.Eccentricity;
-    eccentricity2(n) = sqrt(((mayor_axis(n)^2)-(minor_axis(n)^2)))/mayor_axis(n);
+    eccentricity2(n) = sqrt(((mayor_axis(n).^2)-(minor_axis(n).^2)))/mayor_axis(n);
     solidity(n) = stats.Solidity;
     diameter(n) = stats.EquivDiameter;
     
@@ -156,7 +156,7 @@ for n = 1:total_images_uji
     Open_uji = bwmorph(Biner_uji,'open');
     Close_uji = bwmorph(Open_uji,'close');
     
-%     if (n>=17) && (n<=20)
+%     if (n==21)
 %         figure,imshow(Close_uji2);title(filenames_uji(n).name);
 %     end
 %     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
@@ -170,15 +170,15 @@ for n = 1:total_images_uji
     minor_axis_uji(n) = stats_uji.MinorAxisLength;
     mayor_axis_uji(n) = stats_uji.MajorAxisLength;
     convexity_uji(n) = convex_perim_uji(n)/perimeter_uji(n);
-    co_uji(n) = (perimeter_uji(n)^2)/area_uji(n);
-    co2_uji(n) = (perimeter_uji(n)^2)/(4*pi*area_uji(n));
+    co_uji(n) = (perimeter_uji(n).^2)/area_uji(n);
+    co2_uji(n) = (perimeter_uji(n).^2)/(4*pi*area_uji(n));
     conv_area_uji(n) = stats_uji.ConvexArea;
     conv_hull_uji(n) = conv_area_uji(n)-area_uji(n);
-    ro_uji(n) = (4*pi*area_uji(n))/(perimeter_uji(n)^2);
-    ro2_uji(n) = (4*pi*area_uji(n))/(convex_perim_uji(n)^2);
-    ro3_uji(n) = (4*area_uji(n))/(pi*(mayor_axis_uji(n)^2));
+    ro_uji(n) = (4*pi*area_uji(n))/(perimeter_uji(n).^2);
+    ro2_uji(n) = (4*pi*area_uji(n))/(convex_perim_uji(n).^2);
+    ro3_uji(n) = (4*area_uji(n))/(pi*(mayor_axis_uji(n).^2));
     eccentricity_uji(n) = stats_uji.Eccentricity;
-    eccentricity2_uji(n) = sqrt(((mayor_axis_uji(n)^2)-(minor_axis_uji(n)^2)))/mayor_axis_uji(n);
+    eccentricity2_uji(n) = sqrt(((mayor_axis_uji(n).^2)-(minor_axis_uji(n).^2)))/mayor_axis_uji(n);
     solidity_uji(n) = stats_uji.Solidity;
     diameter_uji(n) = stats_uji.EquivDiameter;
     
@@ -197,21 +197,23 @@ end
 % testset  = [area_uji rect_uji co_uji solidity_uji prp_uji rpd_uji];
 % 66.67%
 
-tester = 6;
+tester = 1;
 latih = 0;
 uji = 0;
 if isequal(tester,1)
     % KLASIFIKASI MUTU MUTIARA BERDASARKAN BENTUK DAN UKURAN MENGGUNAKAN K-NEAREST NEIGHBOR
     % Penulis :	Ardiyallah Akbar
     % Tahun	: 2017
-    % Akurasi Latih : 94.44%
-    % Akurasi Uji : 75%
-
-    latih = [area perimeter solidity ro];
-    uji =  [area_uji perimeter_uji solidity_uji ro_uji];
+    % Akurasi Latih : 93.33%
+    % Akurasi Uji : 72%
+    % Akurasi Non : 80%
     
-    %     latih = [area perimeter diameter solidity];88.89%
-%     uji =  [area_uji perimeter_uji diameter_uji solidity_uji];83.33%
+
+    latih = [area perimeter ro co];
+    uji =  [area_uji perimeter_uji ro_uji co_uji];
+    
+%     latih = [area perimeter ro co];
+%     uji =  [area_uji perimeter_uji ro_uji co_uji];
 elseif isequal(tester,2)
     % Ekstraksi dan Seleksi Fitur untuk Klasifikasi Sel Epitel dengan Sel Radang pada Citra Pap Smear
     % Penulis :	Rahadian Kurniawan
@@ -225,8 +227,8 @@ elseif isequal(tester,3)
     % Ekstraksi dan Seleksi Fitur untuk Klasifikasi Sel Epitel dengan Sel Radang pada Citra Pap Smear
     % Penulis :	Rahadian Kurniawan
     % Tahun	: 2013
-    % Akurasi Latih : 83.33%
-    % Akurasi Uji : 75%
+    % Akurasi Latih : 100.00%
+    % Akurasi Uji : 76%
     
     latih = [minor_axis mayor_axis eccentricity diameter perimeter ro co];
     uji = [minor_axis_uji mayor_axis_uji eccentricity_uji diameter_uji perimeter_uji ro_uji co_uji];
@@ -315,8 +317,8 @@ else
     % Akurasi Latih : 100.00% kalo ada rpd, prp, dan area
     % Akurasi Uji : 66.67%
 %     
-    latih = [area perimeter co];
-    uji =   [area_uji perimeter_uji co_uji];
+    latih = [slim ro rect2 narrow rpd prp];
+    uji =   [slim_uji ro_uji rect2_uji narrow_uji rpd_uji prp_uji];
 
 %     latih = [area co solidity elongation prp rpd];
 %     uji =  [area_uji co_uji solidity_uji elongation_uji prp_uji rpd_uji];

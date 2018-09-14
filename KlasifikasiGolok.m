@@ -223,23 +223,20 @@ else
     % Ekstraksi Bentuk
     ekstraksi = regionprops(Closing,'all');
     area = ekstraksi.Area;
-    convex_area = ekstraksi.ConvexArea;
-    minor_axis = ekstraksi.MinorAxisLength;
-    mayor_axis = ekstraksi.MajorAxisLength;
-    c = sqrt(mayor_axis.^2 - minor_axis.^2);
-    eccentricity = c./mayor_axis;
-    solidity = area./convex_area;
-    Data_Uji = [eccentricity mayor_axis minor_axis solidity]
+    perimeter = ekstraksi.Perimeter;
+    roundness = (4*pi*area)/(perimeter.^2);
+    compactness = (perimeter.^2)/area;
+    Data_Uji = [area perimeter roundness compactness]
     
     ciri_bentuk = cell(4,2);
-    ciri_bentuk{1,1} = 'Eccentricity';
-    ciri_bentuk{2,1} = 'Major Axis Length';
-    ciri_bentuk{3,1} = 'Minor Axis Length';
-    ciri_bentuk{4,1} = 'Solidity';
-    ciri_bentuk{1,2} = eccentricity;
-    ciri_bentuk{2,2} = mayor_axis;
-    ciri_bentuk{3,2} = minor_axis;
-    ciri_bentuk{4,2} = solidity;
+    ciri_bentuk{1,1} = 'Area';
+    ciri_bentuk{2,1} = 'Perimeter';
+    ciri_bentuk{3,1} = 'Roundness';
+    ciri_bentuk{4,1} = 'Compactness';
+    ciri_bentuk{1,2} = area;
+    ciri_bentuk{2,2} = perimeter;
+    ciri_bentuk{3,2} = roundness;
+    ciri_bentuk{4,2} = compactness;
     
     row_cell = cell(4,1);
     for i = 1:4
