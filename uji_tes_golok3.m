@@ -203,7 +203,7 @@ end
 % testset  = [area_uji rect_uji co_uji solidity_uji prp_uji rpd_uji];
 % 66.67%
 
-tester = 6;
+tester = 1;
 latih = 0;
 uji = 0;
 if isequal(tester,1)
@@ -213,8 +213,8 @@ if isequal(tester,1)
     % Akurasi Latih : 94.44%
     % Akurasi Uji : 75%
 
-    latih = [area perimeter solidity ro];
-    uji =  [area_uji perimeter_uji solidity_uji ro_uji];
+    latih = [area perimeter ro co];
+    uji =  [area_uji perimeter_uji ro_uji co_uji];
     
     %     latih = [area perimeter diameter solidity];88.89%
 %     uji =  [area_uji perimeter_uji diameter_uji solidity_uji];83.33%
@@ -340,7 +340,7 @@ tester
 % Testing
 BayesModel = fitcnb(latih,class);
 
-save BayesGolok.mat BayesModel
+% save BayesGolok.mat BayesModel
 
 [isBayes,posterior] = predict(BayesModel,latih);
 [isBayes2,posterior2] = predict(BayesModel,uji);
