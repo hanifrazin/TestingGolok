@@ -180,31 +180,24 @@ else
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     
     % Crop Citra (Memotong Citra)
-    Crop = imcrop(Gray,[105.5 9.5 193 106]);
+    Crop = imcrop(Gray,[104.5 0.5 190 70]);
     
     % Merubah ukuran crop citra ke ukuran 75x150 pixel
-    Resize = imresize(Crop,[75 150]); 
-    
-    % Menghaluskan Citra
-    fmed3x3 = ordfilt2(Resize,5,ones(3,3));
-    
+    Resize = imresize(Crop,[50 150]); 
+     
     axes(handles.axes4);
-    imshow(fmed3x3),title('Crop Citra',...
+    imshow(Resize),title('Crop Citra',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     
     %% Segmentasi
-    Biner = imbinarize(fmed3x3,0.8);
+    Biner = imbinarize(Resize,0.8);
     Invers = imcomplement(Biner);
     
-    %% Operasi Morfologi
-    SE = [1 1 1;1 1 1;1 1 1];
-    Open = imopen(Invers,SE);
-    Close = imclose(Open,SE);
-    
     axes(handles.axes5);
-    imshow(Close),title('Morfologi',...
+    imshow(Invers),title('Citra Biner',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
-    setappdata(mydatacontainer,'morphologi',Close);
+    
+    setappdata(mydatacontainer,'Biner',Invers);
 end
 
 
@@ -215,31 +208,37 @@ delete(handles.figure1)
 % --- Executes on button press in btnEkstraksi.
 function btnEkstraksi_Callback(hObject, eventdata, handles)
 mydatacontainer = getappdata(0,'datacontainer');
-Closing = getappdata(mydatacontainer,'morphologi');
-if isempty(Closing)
-    H = 'Maaf gambar belum di proses';
+Invers = getappdata(mydatacontainer,'Biner');
+if isempty(Invers)
+    H = 'Maaf gambar belum di proses menjadi citra biner';
     msgbox(H,'Warning','warn');
 else
+    %% Operasi Morfologi
+    SE = [1 1 1;1 1 1;1 1 1];
+    Open = imopen(Invers,SE);
+    Close = imclose(Open,SE);
+    
+    axes(handles.axes5);
+    imshow(Close),title('Morfologi',...
+        'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
+    
     % Ekstraksi Bentuk
-    ekstraksi = regionprops(Closing,'all');
+    ekstraksi = regionprops(Close,'all');
     area = ekstraksi.Area;
     perimeter = ekstraksi.Perimeter;
     roundness = (4*pi*area)/(perimeter.^2);
-    compactness = (perimeter.^2)/area;
-    Data_Uji = [area perimeter roundness compactness]
+    Data_Uji = [area perimeter roundness]
     
-    ciri_bentuk = cell(4,2);
+    ciri_bentuk = cell(3,2);
     ciri_bentuk{1,1} = 'Area';
     ciri_bentuk{2,1} = 'Perimeter';
     ciri_bentuk{3,1} = 'Roundness';
-    ciri_bentuk{4,1} = 'Compactness';
     ciri_bentuk{1,2} = area;
     ciri_bentuk{2,2} = perimeter;
     ciri_bentuk{3,2} = roundness;
-    ciri_bentuk{4,2} = compactness;
     
-    row_cell = cell(4,1);
-    for i = 1:4
+    row_cell = cell(3,1);
+    for i = 1:3
         row_cell{i} = num2str(i);
     end
 

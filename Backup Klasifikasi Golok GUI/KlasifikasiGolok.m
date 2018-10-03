@@ -22,7 +22,7 @@ function varargout = KlasifikasiGolok(varargin)
 
 % Edit the above text to modify the response to help KlasifikasiGolok
 
-% Last Modified by GUIDE v2.5 12-Jul-2018 22:49:29
+% Last Modified by GUIDE v2.5 12-Sep-2018 23:29:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,6 +61,7 @@ arrayfun(@cla,findall(0,'type','axes'))
 setappdata(0,'datacontainer',hObject);
 movegui(hObject,'onscreen')% To display application onscreen
 movegui(hObject,'center')  % To display application in the center of screen
+
 axes(handles.axes1)
 cla('reset')
 set(gca,'XTick',[])
@@ -80,6 +81,7 @@ set(gca,'YTick',[])
 set(handles.uitable3,'Data',[])
 set(handles.uitable6,'Data',[])
 set(handles.edit_Hasil,'String',[])
+
 clear all
 clc
 
@@ -142,7 +144,7 @@ end
 
 % --- Executes on button press in btnBuka_Citra.
 function btnBuka_Citra_Callback(hObject, eventdata, handles)
-StartDir = 'test golok';
+StartDir = 'test golok_2';
 [filename, pathname] = uigetfile({'*.jpeg;*.jpg','File Citra (*.jpeg,*.jpg)';
                         '*.jpg','File jpeg (*.jpg)';
                         '*.*','Semua File (*.*)'},...
@@ -152,32 +154,13 @@ if ~isequal(filename,0)
     Img = imread(fullfile(pathname,filename));
     handles.RGB_Img = Img;
     axes(handles.axes1);
-    imshow(handles.RGB_Img),title('Citra RGB',...
+    imshow(handles.RGB_Img),title('Citra Asli',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     guidata(hObject,handles);
     mydatacontainer = getappdata(0,'datacontainer');
     setappdata(mydatacontainer,'gambaroriginal',handles.RGB_Img);
 else
     return;
-end
-
-% --- Executes on button press in btnGray.
-function btnGray_Callback(hObject, eventdata, handles)
-if isempty(get(handles.axes1,'Children'))
-    H = 'Silahkan input gambar terlebih dahulu';
-    msgbox(H,'Warning','warn');
-else
-    mydatacontainer = getappdata(0,'datacontainer');
-    handles.RGB_Img = getappdata(mydatacontainer,'gambaroriginal');
-    
-    % Konversi RGB ke Grayscale
-    Gray = rgb2gray(handles.RGB_Img);
-    
-    axes(handles.axes2);
-    imshow(Gray),title('Citra Grayscale',...
-        'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
-    
-    setappdata(mydatacontainer,'preprocessing',Gray);
 end
 
 % --- Executes on button press in btnPreProcess.
@@ -201,38 +184,10 @@ else
     
     % Merubah ukuran crop citra ke ukuran 75x150 pixel
     Resize = imresize(Crop,[75 150]); 
-    
-    % Menghaluskan Citra
-    fmed3x3 = ordfilt2(Resize,5,ones(3,3));
-    
+     
     axes(handles.axes4);
-    imshow(fmed3x3),title('Crop Citra',...
+    imshow(Resize),title('Crop Citra',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
-    
-    %% Segmentasi
-    Biner = imbinarize(fmed3x3,0.8);
-    Invers = imcomplement(Biner);
-    
-    %% Operasi Morfologi
-    SE = [1 1 1;1 1 1;1 1 1];
-    Open = imopen(Invers,SE);
-    Close = imclose(Open,SE);
-    
-    axes(handles.axes5);
-    imshow(Close),title('Morfologi',...
-        'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
-    setappdata(mydatacontainer,'morphologi',Close);
-end
-
-
-% --- Executes on button press in btnBiner.
-function btnBiner_Callback(hObject, eventdata, handles)
-if isempty(get(handles.axes4,'Children'))
-    H = 'Maaf gambar belum di crop';
-    msgbox(H,'Warning','warn');
-else
-    mydatacontainer = getappdata(0,'datacontainer');
-    MedFilt = getappdata(mydatacontainer,'resize_img');
     
     %% Segmentasi
     Biner = imbinarize(Resize,0.8);
@@ -249,37 +204,36 @@ else
     setappdata(mydatacontainer,'morphologi',Close);
 end
 
+
+% --- Executes on button press in btnExit.
+function btnExit_Callback(hObject, eventdata, handles)
+delete(handles.figure1)
+
 % --- Executes on button press in btnEkstraksi.
 function btnEkstraksi_Callback(hObject, eventdata, handles)
 mydatacontainer = getappdata(0,'datacontainer');
 Closing = getappdata(mydatacontainer,'morphologi');
 if isempty(Closing)
-    H = 'Maaf gambar belum di convert menjadi biner';
+    H = 'Maaf gambar belum di proses';
     msgbox(H,'Warning','warn');
 else
     % Ekstraksi Bentuk
     ekstraksi = regionprops(Closing,'all');
     area = ekstraksi.Area;
-    convex_area = ekstraksi.ConvexArea;
-    minor_axis = ekstraksi.MinorAxisLength;
-    mayor_axis = ekstraksi.MajorAxisLength;
-    c = sqrt(mayor_axis.^2 - minor_axis.^2);
-    eccentricity = c./mayor_axis;
-    solidity = area./convex_area;
-    Data_Uji = [eccentricity mayor_axis minor_axis solidity]
+    perimeter = ekstraksi.Perimeter;
+    roundness = (4*pi*area)/(perimeter.^2);
+    Data_Uji = [area perimeter roundness]
     
-    ciri_bentuk = cell(4,2);
-    ciri_bentuk{1,1} = 'Eccentricity';
-    ciri_bentuk{2,1} = 'Major Axis Length';
-    ciri_bentuk{3,1} = 'Minor Axis Length';
-    ciri_bentuk{4,1} = 'Solidity';
-    ciri_bentuk{1,2} = eccentricity;
-    ciri_bentuk{2,2} = mayor_axis;
-    ciri_bentuk{3,2} = minor_axis;
-    ciri_bentuk{4,2} = solidity;
+    ciri_bentuk = cell(3,2);
+    ciri_bentuk{1,1} = 'Area';
+    ciri_bentuk{2,1} = 'Perimeter';
+    ciri_bentuk{3,1} = 'Roundness';
+    ciri_bentuk{1,2} = area;
+    ciri_bentuk{2,2} = perimeter;
+    ciri_bentuk{3,2} = roundness;
     
-    row_cell = cell(4,1);
-    for i = 1:4
+    row_cell = cell(3,1);
+    for i = 1:3
         row_cell{i} = num2str(i);
     end
 
@@ -330,7 +284,7 @@ else
         hasil = 'Ujung Turun';
     elseif isequal(Posterior(1,5),max(Posterior))
         hasil = 'Petok';
-    elseif isequal(Posterior(1,6),max(Posterior))
+    else
         hasil = 'Bukan Golok Betawi';
     end
     set(handles.edit_Hasil,'String',hasil)
@@ -371,6 +325,3 @@ set(handles.uitable6,'Data',cell(size(get(handles.uitable6,'Data'))))
 set(handles.edit_Hasil,'String',[])
 clear all
 clc
-
-% --- Executes on button press in btnKeluar.
-function btnKeluar_Callback(hObject, eventdata, handles)

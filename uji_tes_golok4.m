@@ -22,9 +22,9 @@ class(26:total_images,1)=6;
 
 class_uji = class;
 
-if isequal(image_folder_uji,'train golok_2')
-    class_uji = class;
-end
+% if isequal(image_folder_uji,'train golok_2')
+%     class_uji = class;
+% end
 
 area = zeros(total_images,1);
 perimeter = zeros(total_images,1);
@@ -61,9 +61,11 @@ for n = 1:total_images
 
     Gray = rgb2gray(Img);
 %     Contrast = imadjust(Gray,stretchlim(Gray),[]);
-    MedImg = medfilt2(Gray);
-    Crop = imcrop(MedImg,[105.5 9.5 193 106]);
+    
+%     MedImg = ordfilt2(Gray,5,ones(3,3));
+    Crop = imcrop(Gray,[105.5 9.5 193 106]);
     Resize = imresize(Crop,[75 150]);
+    
 %     Biner = Resize < 200;
 %     Biner = not(Resize > 200);
     level(n) = graythresh(Resize);
@@ -73,14 +75,14 @@ for n = 1:total_images
     Close2 = imclose(Open2,SE2);
     Open = bwmorph(Biner,'open');
     Close = bwmorph(Open,'close');
-%     
-%     if (n>=16) && (n<=20)
-%         figure,imshow(Close2);title(filenames(n).name);
-%     end
+    Fill = imfill(Close2,'holes');
+    
+%         figure,imshow(Fill);title(filenames(n).name);
+
     
     conv = bwconvhull(Close);
     Label = bwlabel(Close);
-    stats = regionprops(Close2,'all');
+    stats = regionprops(Fill,'all');
     conv_stats = regionprops(conv,'Perimeter');
     area(n) = stats.Area;
     perimeter(n) = stats.Perimeter;
@@ -143,22 +145,27 @@ for n = 1:total_images_uji
     
     Gray_uji = rgb2gray(Img_uji);
 %     Contrast_uji = imadjust(Gray_uji,stretchlim(Gray_uji),[]);
-    MedImg_uji = medfilt2(Gray_uji);
-    Crop_uji = imcrop(MedImg_uji,[105.5 9.5 193 106]);
+    
+%     MedImg_uji = ordfilt2(Gray_uji,25,ones(7,7));
+    Crop_uji = imcrop(Gray_uji,[105.5 9.5 193 106]);
     Resize_uji = imresize(Crop_uji,[75 150]); 
+    
 %     Biner_uji = Resize_uji < 200;
 %     Biner_uji = not(Resize_uji > 200);
     level_uji(n) = graythresh(Resize_uji);
     Biner_uji = not(imbinarize(Resize_uji,0.8));
-    
+    bin = imbinarize(Resize_uji,0.8);
     Open_uji2 = imopen(Biner_uji,SE2);
     Close_uji2 = imclose(Open_uji2,SE2);
     Open_uji = bwmorph(Biner_uji,'open');
     Close_uji = bwmorph(Open_uji,'close');
-    
-%     if (n==21)
+    Fill_uji = imfill(Close_uji2,'holes');
+%         if(n==16)    
 %         figure,imshow(Close_uji2);title(filenames_uji(n).name);
-%     end
+%         end
+%         path_uji = ['C:\Users\HANIF\Documents\MATLAB\Testing Golok\Morfologi\Close ',filenames_uji(n).name]
+%         imwrite(Close_uji2,path_uji,'jpg')
+%    
 %     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
 %     imwrite(Open_uji,path_uji,'jpg')
     conv_uji = bwconvhull(Close_uji);
@@ -193,144 +200,15 @@ for n = 1:total_images_uji
     elongation_uji(n) = 1 - (minor_axis_uji(n)/mayor_axis_uji(n));
 end
 
-% trainset = [area rect co solidity prp rpd]; 94%
-% testset  = [area_uji rect_uji co_uji solidity_uji prp_uji rpd_uji];
-% 66.67%
+% KLASIFIKASI MUTU MUTIARA BERDASARKAN BENTUK DAN UKURAN MENGGUNAKAN K-NEAREST NEIGHBOR
+% Penulis :	Ardiyallah Akbar
+% Tahun	: 2017
+% Akurasi Latih : 93.33%
+% Akurasi Uji : 72%
+% Akurasi Non : 80%
 
-tester = 1;
-latih = 0;
-uji = 0;
-if isequal(tester,1)
-    % KLASIFIKASI MUTU MUTIARA BERDASARKAN BENTUK DAN UKURAN MENGGUNAKAN K-NEAREST NEIGHBOR
-    % Penulis :	Ardiyallah Akbar
-    % Tahun	: 2017
-    % Akurasi Latih : 93.33%
-    % Akurasi Uji : 72%
-    % Akurasi Non : 80%
-    
-
-    latih = [area perimeter ro co];
-    uji =  [area_uji perimeter_uji ro_uji co_uji];
-    
-%     latih = [area perimeter ro co];
-%     uji =  [area_uji perimeter_uji ro_uji co_uji];
-elseif isequal(tester,2)
-    % Ekstraksi dan Seleksi Fitur untuk Klasifikasi Sel Epitel dengan Sel Radang pada Citra Pap Smear
-    % Penulis :	Rahadian Kurniawan
-    % Tahun	: 2013
-    % Akurasi Latih : 83.33%
-    % Akurasi Uji : 75%
-    
-    latih = [minor_axis mayor_axis eccentricity diameter perimeter ro co];
-    uji = [minor_axis_uji mayor_axis_uji eccentricity_uji diameter_uji perimeter_uji ro_uji co_uji];
-elseif isequal(tester,3)
-    % Ekstraksi dan Seleksi Fitur untuk Klasifikasi Sel Epitel dengan Sel Radang pada Citra Pap Smear
-    % Penulis :	Rahadian Kurniawan
-    % Tahun	: 2013
-    % Akurasi Latih : 100.00%
-    % Akurasi Uji : 76%
-    
-    latih = [minor_axis mayor_axis eccentricity diameter perimeter ro co];
-    uji = [minor_axis_uji mayor_axis_uji eccentricity_uji diameter_uji perimeter_uji ro_uji co_uji];
-elseif isequal(tester,4)
-    % Identifikasi Varietas Padi Menggunakan Pengolahan Citra Digital dan Analisis Diskriminan
-    % Penulis :	Adnan
-    % Tahun	: 2015
-    % Akurasi Latih : 66.67%
-    % Akurasi Uji : 75%
-    
-    latih = [ro slim ro3 solidity];
-    uji = [ro_uji slim_uji ro3_uji solidity_uji];
-elseif isequal(tester,5)
-    % SELEKSI FITUR MENGGUNAKAN EKSTRAKSI FITUR BENTUK, WARNA, DAN TEKSTUR
-    % DALAM SISTEM TEMU KEMBALI CITRA DAUN
-    % Penulis :	Yuita Arum Sari
-    % Tahun	: 2014
-    % Akurasi Latih : 83.33%
-    % Akurasi Uji : 66.67%
-    
-    latih = [slim ro rect2 narrow rpd prp];
-    uji = [slim_uji ro_uji rect2_uji narrow_uji rpd_uji prp_uji];
-elseif isequal(tester,6)
-    % Fish Shape Recognition using Multiple Shape Descriptors
-    % Penulis :	Moumita Ghosh
-    % Tahun	: 2013
-    % Akurasi Latih : 94.74%
-    % Akurasi Uji : 83.33%
-    solid = area./conv_area;
-    solid_uji = area_uji./conv_area_uji;
-    c = sqrt(mayor_axis.^2 - minor_axis.^2);
-    c_uji = sqrt(mayor_axis_uji.^2 - minor_axis_uji.^2);
-    eccen = c./mayor_axis;
-    eccen_uji = c_uji./mayor_axis_uji;
-    latih = [eccen mayor_axis minor_axis solid];
-    uji = [eccen_uji mayor_axis_uji minor_axis_uji solid_uji];
-    
-elseif isequal(tester,7)
-    % Identifikasi Citra Daun Menggunakan Morfologi, Local Binary Patterns dan Convex Hulls
-    % Penulis :	Desta Sandya Prasvita
-    % Tahun	: 2016
-    % Akurasi Latih : 88.89%
-    % Akurasi Uji : 66.67%
-    
-    latih = [co slim ro rect2 narrow rpd prp conv_hull];
-    uji = [co_uji slim_uji ro_uji rect2_uji narrow_uji rpd_uji prp_uji conv_hull_uji];
-elseif isequal(tester,8)
-    % IDENTIFIKASI JENIS CITRA CABAI MENGGUNAKAN KLASIFIKASI CITY BLOCK DISTANCE DENGAN FITUR BENTUK 
-    % SEBAGAI EKSTRAKSI CIRI
-    % Penulis :	FRITA DEVI ANGGRAINI
-    % Tahun	: 2016
-    % Akurasi Latih : 88.89%
-    % Akurasi Uji : 66.67%
-    
-    latih = [slim ro rect2 prp];
-    uji = [slim_uji ro_uji rect2_uji prp_uji];
-elseif isequal(tester,9)
-    % IDENTIFIKASI PENYAKIT DAUN JABON BERDASARKAN CIRI MORPOLOGI MENGGUNAKAN SUPPORT VECTOR MACHINE (SVM)
-    % SEBAGAI EKSTRAKSI CIRI
-    % Penulis :	FUZY YUSTIKAMANIK
-    % Tahun	: 2015
-    % Akurasi Latih : 72.22%
-    % Akurasi Uji : 75%
-    
-    latih = [ro2 solidity elongation eccentricity2 ro convexity rect];
-    uji = [ro2_uji solidity_uji elongation_uji eccentricity2_uji ro_uji convexity_uji rect_uji];
-elseif isequal(tester,10)
-    % KLASIFIKASI DAUN HERBAL MENGGUNAKAN METODE NAÏVE BAYES CLASSIFIER DAN K-NEAREST NEIGHBOR
-    % Penulis :	Febri Liantoni
-    % Tahun	: 2015
-    % Akurasi Latih : 72.22%
-    % Akurasi Uji : 66.67%
-    
-    latih = [convexity ro eccentricity];
-    uji = [convexity_uji ro_uji eccentricity_uji];
-elseif isequal(tester,11)
-    % KLASIFIKASI DAUN MANGGA MENGGUNAKAN METODE NAÏVE BAYES CLASSIFIER
-    % Penulis :	Febri Liantoni
-    % Tahun	: 2015
-    % Akurasi Latih : 94.44%
-    % Akurasi Uji : 75%
-    
-    latih = [area perimeter ro];
-    uji = [area_uji perimeter_uji ro_uji];
-else
-    % Akurasi Latih : 100.00% kalo ada rpd, prp, dan area
-    % Akurasi Uji : 66.67%
-%     
-    latih = [slim ro rect2 narrow rpd prp];
-    uji =   [slim_uji ro_uji rect2_uji narrow_uji rpd_uji prp_uji];
-
-%     latih = [area co solidity elongation prp rpd];
-%     uji =  [area_uji co_uji solidity_uji elongation_uji prp_uji rpd_uji];
-    
-    % trainset = [area rect co solidity prp rpd]; 94%
-    % testset  = [area_uji rect_uji co_uji solidity_uji prp_uji rpd_uji];
-end
-
-tester
-% trainset = latih;
-% testset  = uji;
-
+latih = [area perimeter ro];
+uji =  [area_uji perimeter_uji ro_uji];
 
 % load BayesModelGolok
 % Testing
@@ -338,6 +216,7 @@ BayesModel = fitcnb(latih,class);
 
 save BayesGolok.mat BayesModel
 
+tic;
 [isBayes,posterior] = predict(BayesModel,latih);
 [isBayes2,posterior2] = predict(BayesModel,uji);
 
@@ -365,3 +244,8 @@ salah_test_non = numel(class_uji(26:30))-sum(diag(C_test_non))
 Akurasi_test_non = 100*(sum(diag(C_test_non))./sum(C_test_non(:)));  
 Table_test_non = table(isBayes2(26:30),class_uji(26:30))
 disp(['accuracy Data uji Bayes Non Betawi = ',num2str(Akurasi_test_non,'%.2f'),'%'])
+toc;
+
+T_Latih=transpose(latih);
+T_Uji = transpose(uji);
+T_Poster=transpose(posterior2);
