@@ -227,18 +227,21 @@ else
     area = ekstraksi.Area;
     perimeter = ekstraksi.Perimeter;
     roundness = (4*pi*area)/(perimeter.^2);
-    Data_Uji = [area perimeter roundness]
+    compactness = (perimeter(n).^2)/area(n);
+    Data_Uji = [area perimeter roundness compactness]
     
-    ciri_bentuk = cell(3,2);
+    ciri_bentuk = cell(4,2);
     ciri_bentuk{1,1} = 'Area';
     ciri_bentuk{2,1} = 'Perimeter';
     ciri_bentuk{3,1} = 'Roundness';
+    ciri_bentuk{4,1} = 'Compactness';
     ciri_bentuk{1,2} = area;
     ciri_bentuk{2,2} = perimeter;
     ciri_bentuk{3,2} = roundness;
+    ciri_bentuk{4,2} = compactness;
     
-    row_cell = cell(3,1);
-    for i = 1:3
+    row_cell = cell(4,1);
+    for i = 1:4
         row_cell{i} = num2str(i);
     end
 
@@ -265,7 +268,7 @@ else
     val_posterior{3,1} = 'Golok Sorenan';
     val_posterior{4,1} = 'Golok Ujung Turun';
     val_posterior{5,1} = 'Golok Petok';
-    val_posterior{6,1} = 'Bukan Golok Betawi';
+    val_posterior{6,1} = 'Golok Pameuncit';
     val_posterior{1,2} = num2str(Posterior(1));
     val_posterior{2,2} = num2str(Posterior(2));
     val_posterior{3,2} = num2str(Posterior(3));

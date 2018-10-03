@@ -215,7 +215,7 @@ uji =  [area_uji perimeter_uji ro_uji co_uji];
 % Testing
 BayesModel = fitcnb(latih,class);
 
-% save BayesGolok.mat BayesModel
+save BayesGolok.mat BayesModel
 
 tic;
 [isBayes,posterior] = predict(BayesModel,latih);
