@@ -96,8 +96,8 @@ for n = 1:total_images_uji
 %         if(n==16)    
 %         figure,imshow(Fill_uji);title(filenames_uji(n).name);
 %         end
-%         path_uji = ['C:\Users\HANIF\Documents\MATLAB\Testing Golok\Morfologi\Close ',filenames_uji(n).name]
-%         imwrite(Close_uji2,path_uji,'jpg')
+        path_uji = ['C:\Users\HANIF\Documents\MATLAB\Testing Golok\Crop & Resize\Resize ',filenames_uji(n).name]
+        imwrite(Resize_uji,path_uji,'jpg')
 %    
 %     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
 %     imwrite(Open_uji,path_uji,'jpg')
@@ -109,13 +109,6 @@ for n = 1:total_images_uji
     ro_uji(n) = (4*pi*area_uji(n))/(perimeter_uji(n).^2);
 end
 
-% KLASIFIKASI MUTU MUTIARA BERDASARKAN BENTUK DAN UKURAN MENGGUNAKAN K-NEAREST NEIGHBOR
-% Penulis :	Ardiyallah Akbar
-% Tahun	: 2017
-% Akurasi Latih : 93.33%
-% Akurasi Uji : 72%
-% Akurasi Non : 80%
-
 latih = [area perimeter ro co];
 uji =  [area_uji perimeter_uji ro_uji co_uji];
 
@@ -123,7 +116,7 @@ uji =  [area_uji perimeter_uji ro_uji co_uji];
 % Testing
 BayesModel = fitcnb(latih,class);
 
-save BayesGolok.mat BayesModel
+% save BayesGolok.mat BayesModel
 
 tic;
 [isBayes,posterior] = predict(BayesModel,latih);

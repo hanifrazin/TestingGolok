@@ -22,7 +22,7 @@ function varargout = KlasifikasiGolok(varargin)
 
 % Edit the above text to modify the response to help KlasifikasiGolok
 
-% Last Modified by GUIDE v2.5 12-Sep-2018 23:29:30
+% Last Modified by GUIDE v2.5 05-Oct-2018 09:56:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -144,7 +144,7 @@ end
 
 % --- Executes on button press in btnBuka_Citra.
 function btnBuka_Citra_Callback(hObject, eventdata, handles)
-StartDir = 'test golok_2';
+StartDir = 'golok_uji';
 [filename, pathname] = uigetfile({'*.jpeg;*.jpg','File Citra (*.jpeg,*.jpg)';
                         '*.jpg','File jpeg (*.jpg)';
                         '*.*','Semua File (*.*)'},...
@@ -174,18 +174,14 @@ else
     
     % Konversi RGB ke Grayscale
     Gray = rgb2gray(handles.RGB_Img);
-    
-    axes(handles.axes2);
-    imshow(Gray),title('Citra Grayscale',...
-        'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
-    
+     
     % Crop Citra (Memotong Citra)
     Crop = imcrop(Gray,[104.5 0.5 190 70]);
     
     % Merubah ukuran crop citra ke ukuran 75x150 pixel
     Resize = imresize(Crop,[50 150]); 
      
-    axes(handles.axes4);
+    axes(handles.axes2);
     imshow(Resize),title('Crop Citra',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     
@@ -193,20 +189,15 @@ else
     Biner = imbinarize(Resize,0.8);
     Invers = imcomplement(Biner);
     
-    axes(handles.axes5);
+    axes(handles.axes4);
     imshow(Invers),title('Citra Biner',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     
     setappdata(mydatacontainer,'Biner',Invers);
 end
 
-
-% --- Executes on button press in btnExit.
-function btnExit_Callback(hObject, eventdata, handles)
-delete(handles.figure1)
-
-% --- Executes on button press in btnEkstraksi.
-function btnEkstraksi_Callback(hObject, eventdata, handles)
+% --- Executes on button press in btnMorfologi.
+function btnMorfologi_Callback(hObject, eventdata, handles)
 mydatacontainer = getappdata(0,'datacontainer');
 Invers = getappdata(mydatacontainer,'Biner');
 if isempty(Invers)
@@ -217,17 +208,33 @@ else
     SE = [1 1 1;1 1 1;1 1 1];
     Open = imopen(Invers,SE);
     Close = imclose(Open,SE);
-    
+    Fill = imfill(Close,'holes');
     axes(handles.axes5);
-    imshow(Close),title('Morfologi',...
+    imshow(Fill),title('Operasi Morfologi',...
         'FontName','Maiandra GD','FontSize',12,'FontWeight','bold');
     
+    setappdata(mydatacontainer,'Morph',Fill);
+end
+
+% --- Executes on button press in btnExit.
+function btnExit_Callback(hObject, eventdata, handles)
+delete(handles.figure1)
+
+% --- Executes on button press in btnEkstraksi.
+function btnEkstraksi_Callback(hObject, eventdata, handles)
+mydatacontainer = getappdata(0,'datacontainer');
+Morph = getappdata(mydatacontainer,'Morph');
+if isempty(Morph)
+    H = 'Maaf gambar belum di proses dengan operasi morfologi';
+    msgbox(H,'Warning','warn');
+else
+    
     % Ekstraksi Bentuk
-    ekstraksi = regionprops(Close,'all');
+    ekstraksi = regionprops(Morph,'all');
     area = ekstraksi.Area;
     perimeter = ekstraksi.Perimeter;
     roundness = (4*pi*area)/(perimeter.^2);
-    compactness = (perimeter(n).^2)/area(n);
+    compactness = (perimeter.^2)/area;
     Data_Uji = [area perimeter roundness compactness]
     
     ciri_bentuk = cell(4,2);
