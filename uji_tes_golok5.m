@@ -96,8 +96,8 @@ for n = 1:total_images_uji
 %         if(n==16)    
 %         figure,imshow(Fill_uji);title(filenames_uji(n).name);
 %         end
-        path_uji = ['C:\Users\HANIF\Documents\MATLAB\Testing Golok\Crop & Resize\Resize ',filenames_uji(n).name]
-        imwrite(Resize_uji,path_uji,'jpg')
+%         path_uji = ['C:\Users\HANIF\Documents\MATLAB\Testing Golok\Biner\Invers ',filenames_uji(n).name]
+%         imwrite(Biner_uji,path_uji,'jpg')
 %    
 %     path_uji = ['C:\Users\HANIF\Documents\MATLAB\Naive Bayes - Golok\Biner\Morph ',filenames_uji(n).name]
 %     imwrite(Open_uji,path_uji,'jpg')
