@@ -231,11 +231,11 @@ else
     
     % Ekstraksi Bentuk
     ekstraksi = regionprops(Morph,'all');
-    area = ekstraksi.Area;
-    perimeter = ekstraksi.Perimeter;
-    roundness = (4*pi*area)/(perimeter.^2);
-    compactness = (perimeter.^2)/area;
-    Data_Uji = [area perimeter roundness compactness]
+    area = ekstraksi.Area
+    perimeter = ekstraksi.Perimeter
+    roundness = (4*pi*area)/(perimeter.^2)
+    compactness = (perimeter.^2)/area
+    Data_Uji = [area perimeter roundness compactness];
     
     ciri_bentuk = cell(4,2);
     ciri_bentuk{1,1} = 'Area';

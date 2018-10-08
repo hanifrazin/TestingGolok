@@ -27,7 +27,11 @@ class_uji = class;
 % end
 
 area = zeros(total_images,1);
+areas = zeros(total_images,1);
 perimeter = zeros(total_images,1);
+perimeters = zeros(total_images,1);
+perimeters2 = zeros(total_images,1);
+perimeters3 = zeros(total_images,1);
 diameter = zeros(total_images,1);
 ro = zeros(total_images,1);
 co = zeros(total_images,1);
@@ -61,16 +65,26 @@ for n = 1:total_images
     
     conv = bwconvhull(Close);
     Label = bwlabel(Close);
+    cc = bwboundaries(Fill);
+    B = cc{:,1};
+    cc2 = bwconncomp(Fill);
     stats = regionprops(Fill,'all');
     conv_stats = regionprops(conv,'Perimeter');
     area(n) = stats.Area;
+    areas(n) = sum(Fill(:));
     perimeter(n) = stats.Perimeter;
-    co(n) = (perimeter(n).^2)/area(n);
-    ro(n) = (4*pi*area(n))/(perimeter(n).^2);
+    perimeters(n) = computePerimeterFromBoundary(B);
+    B1 = sqrt(diff(B(:,1)).^2 + diff(B(:,2)).^2);
+    perimeters2(n) = sum(B1);
+    perimeters3(n) = computePerimeterFromBoundaryOld(B);
+    co(n) = (perimeters(n).^2)/areas(n);
+    ro(n) = (4*pi*areas(n))/(perimeters(n).^2);
 end
 
 area_uji = zeros(total_images_uji,1);
+areas_uji = zeros(total_images_uji,1);
 perimeter_uji = zeros(total_images_uji,1);
+perimeters_uji = zeros(total_images_uji,1);
 ro_uji = zeros(total_images_uji,1);
 co_uji = zeros(total_images_uji,1);
 level_uji = zeros(total_images_uji,1);
@@ -104,13 +118,17 @@ for n = 1:total_images_uji
     conv_uji = bwconvhull(Close_uji);
     stats_uji = regionprops(Fill_uji,'all');
     area_uji(n) = stats_uji.Area;
+    areas_uji(n) = sum(Fill_uji(:));
+    cc_uji = bwboundaries(Fill_uji);
+    B_uji = cc_uji{:,1};
     perimeter_uji(n) = stats_uji.Perimeter;
-    co_uji(n) = (perimeter_uji(n).^2)/area_uji(n);
-    ro_uji(n) = (4*pi*area_uji(n))/(perimeter_uji(n).^2);
+    [perimeters_uji(n),delta,corner,even] = computePerimeterFromBoundarys(B_uji);
+    co_uji(n) = (perimeters_uji(n).^2)/areas_uji(n);
+    ro_uji(n) = (4*pi*areas_uji(n))/(perimeters_uji(n).^2);
 end
 
-latih = [area perimeter ro co];
-uji =  [area_uji perimeter_uji ro_uji co_uji];
+latih = [areas perimeters ro co];
+uji =  [areas_uji perimeters_uji ro_uji co_uji];
 
 % load BayesModelGolok
 % Testing
@@ -179,3 +197,19 @@ Y=[uji posterior2];
 T_Latih=transpose(latih);
 T_Uji = transpose(uji);
 T_Poster=transpose(posterior2);
+
+function [keliling,delta,isCorner,isEven] = computePerimeterFromBoundarys(B)
+    delta = diff(B).^2;
+    if(size(delta,1) > 1)
+        isCorner  = any(diff([delta;delta(1,:)],1),2); % Count corners.
+        isEven    = any(~delta,2);
+        keliling = sum(isEven,1)*0.980 + sum(~isEven,1)*1.406 - sum(isCorner,1)*0.091;
+    else
+        keliling = 0; % if the number of pixels is 1 or less.
+    end
+end
+function perimeter = computePerimeterFromBoundaryOld(B)
+
+    delta = diff(B).^2;
+    perimeter = sum(sqrt(sum(delta,2)));
+end
